@@ -7,8 +7,6 @@ import { RACE_TYPES } from '@/lib/constants';
 import type { Participant, RaceTypeId, RaceResult } from '@/types';
 
 const MAX_LANE_H = 180;
-const MIN_LANE_H = 120;
-const NON_TRACK_H = 170; // padding + gaps + header + progress bar + footer
 
 function RaceLane({ participant, position, rank, finished, racerW, flagW, raceType, laneH, spriteW, spriteSheetW }: {
   participant: Participant;
@@ -79,51 +77,54 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
   const [tick, setTick] = useState(0);
   const [showComplete, setShowComplete] = useState(false);
   const [mobile, setMobile] = useState(false);
-  const [viewH, setViewH] = useState(() => typeof window !== 'undefined' ? window.innerHeight : 900);
+  const [portrait, setPortrait] = useState(false);
+  // trackH is the actual rendered height of the race-track div (measured via ref)
+  const [trackH, setTrackH] = useState(600);
+  const [footballFlagW, setFootballFlagW] = useState(46);
+
   const raceData = useRef(simulateRace(participants.length, seed));
   const onFinishRef = useRef(onFinish);
   onFinishRef.current = onFinish;
+  const trackRef = useRef<HTMLDivElement>(null);
   const rt = RACE_TYPES.find((r) => r.id === raceType);
-
-  useEffect(() => {
-    const onResize = () => {
-      setMobile(window.innerWidth < 600);
-      setViewH(window.innerHeight);
-    };
-    onResize();
-    window.addEventListener('resize', onResize);
-    return () => window.removeEventListener('resize', onResize);
-  }, []);
-
   const isFootball = raceType === 'football';
 
-  // Shrink lane height so all players fit in the viewport without scrolling
-  const laneH = isFootball
-    ? Math.max(MIN_LANE_H, Math.min(MAX_LANE_H, Math.floor((viewH - NON_TRACK_H) / participants.length)))
-    : MAX_LANE_H;
+  useEffect(() => {
+    const check = () => {
+      setMobile(window.innerWidth < 600);
+      setPortrait(window.innerWidth < window.innerHeight && window.innerWidth < 768);
+    };
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
-  // Scale sprite proportionally to laneH
-  const spriteW = isFootball ? Math.max(18, Math.round(64 * laneH / MAX_LANE_H)) : 0;
-  const spriteSheetW = spriteW * 5;
-
-  const racerW = isFootball ? spriteW : (mobile ? 40 : 108);
-
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [footballFlagW, setFootballFlagW] = useState(46);
-
+  // Measure the track's actual rendered height (from flex:1) then derive laneH, spriteW, flagW
+  // all in one pass to avoid cascading re-renders.
   useLayoutEffect(() => {
     if (!isFootball) return;
     const measure = () => {
       if (!trackRef.current) return;
-      const labelW = mobile ? 80 : 196;
+      const h = trackRef.current.offsetHeight;
+      const newLaneH = Math.min(MAX_LANE_H, Math.floor(h / participants.length));
+      const newSpriteW = Math.max(18, Math.round(64 * newLaneH / MAX_LANE_H));
+      const labelW = mobile ? 110 : 196;
       const trackW = trackRef.current.offsetWidth - labelW;
-      setFootballFlagW(Math.max(0, Math.round(trackW * 0.111 - racerW)));
+      setTrackH(h);
+      setFootballFlagW(Math.max(0, Math.round(trackW * 0.111 - newSpriteW)));
     };
     measure();
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
-  }, [isFootball, mobile, racerW]);
+  }, [isFootball, mobile, participants.length]);
 
+  // All lane/sprite dimensions derived from measured trackH
+  const laneH = isFootball
+    ? Math.min(MAX_LANE_H, Math.floor(trackH / participants.length))
+    : MAX_LANE_H;
+  const spriteW = isFootball ? Math.max(18, Math.round(64 * laneH / MAX_LANE_H)) : 0;
+  const spriteSheetW = spriteW * 5;
+  const racerW = isFootball ? spriteW : (mobile ? 40 : 108);
   const flagW = isFootball ? footballFlagW : (mobile ? 20 : 26);
 
   useEffect(() => {
@@ -150,9 +151,37 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
 
   return (
     <div style={{
-      minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '22px 28px', gap: 16,
+      height: '100vh',
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      padding: '22px 28px',
+      gap: 16,
       ...(isFootball && { background: 'linear-gradient(180deg, #0c2414 0%, #183520 100%)' }),
     }}>
+      {portrait && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 400,
+          background: 'rgba(0,0,0,0.92)',
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center', gap: 16,
+        }} onClick={() => setPortrait(false)}>
+          <div style={{ fontSize: 64, lineHeight: 1 }}>↻</div>
+          <div style={{
+            fontFamily: 'var(--font-d)', fontWeight: 900, fontSize: 26,
+            color: '#fff', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center',
+          }}>
+            Rotate your device
+          </div>
+          <div style={{ fontFamily: 'var(--font-m)', fontSize: 13, color: 'rgba(255,255,255,0.55)', textAlign: 'center' }}>
+            Best in landscape mode
+          </div>
+          <div style={{ marginTop: 8, fontFamily: 'var(--font-m)', fontSize: 11, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em' }}>
+            TAP TO CONTINUE ANYWAY
+          </div>
+        </div>
+      )}
+
       {showComplete && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 300,
@@ -172,7 +201,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
       )}
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
           <Logo size="sm" />
           <div style={{ minWidth: 0 }}>
@@ -186,19 +215,19 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
             </span>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
           <span style={{ fontFamily: 'var(--font-m)', fontSize: 12, color: 'var(--ink-muted)' }}>{progress}%</span>
           <span className="live-badge">● LIVE</span>
         </div>
       </div>
 
       {/* Progress bar */}
-      <div style={{ height: 3, background: 'var(--surface-alt)', borderRadius: 2, overflow: 'hidden' }}>
+      <div style={{ height: 3, background: 'var(--surface-alt)', borderRadius: 2, overflow: 'hidden', flexShrink: 0 }}>
         <div style={{ height: '100%', width: `${progress}%`, background: 'var(--accent)', transition: 'width 80ms linear' }} />
       </div>
 
-      {/* Track */}
-      <div ref={trackRef} className={`race-track${isFootball ? ' football-field' : ''}`} style={{ flex: 1, minHeight: laneH * participants.length }}>
+      {/* Track — flex:1 fills all remaining viewport height */}
+      <div ref={trackRef} className={`race-track${isFootball ? ' football-field' : ''}`} style={{ flex: 1, minHeight: 0 }}>
         {participants.map((p, i) => (
           <RaceLane
             key={p.id}
@@ -216,7 +245,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
         ))}
       </div>
 
-      <div style={{ fontFamily: 'var(--font-m)', fontSize: 10, color: 'var(--ink-muted)', textAlign: 'center', letterSpacing: '0.1em' }}>
+      <div style={{ fontFamily: 'var(--font-m)', fontSize: 10, color: 'var(--ink-muted)', textAlign: 'center', letterSpacing: '0.1em', flexShrink: 0 }}>
         SEED {formatSeed(seed)} · {participants.length} RACERS
       </div>
     </div>
