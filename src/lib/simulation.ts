@@ -14,43 +14,45 @@ function mulberry32(seed: number): () => number {
 export function simulateRace(count: number, seed: number): RaceData {
   const rng = mulberry32(seed);
 
-  // 80ms per tick, target ~25 seconds = ~312 ticks
-  // Calibration: baseline 0.10%/tick + burst 1–5% every 10–18 ticks
-  // Expected: 22 bursts × 3% avg + 312 × 0.10% ≈ 100% → leader finishes ~25s
+  // 80ms per tick, target ~25 seconds ≈ 312 ticks.
+  // Each racer has a current speed that eases toward a randomly-changing target
+  // speed. This produces smooth acceleration/deceleration instead of discrete
+  // lurches. Calibration: avg target ≈ 0.32%/tick → 312 ticks to reach 100%.
 
-  // Tiny per-racer pace variation so ties break naturally
-  const basePace = Array.from({ length: count }, () => 0.08 + rng() * 0.04);
+  // Slight per-racer personality so the same seed always produces the same winner.
+  const personalBase = Array.from({ length: count }, () => 0.22 + rng() * 0.06);
+
+  // Current speed starts near personal base; target speed changes gradually.
+  const speed  = personalBase.map(b => b);
+  const target = personalBase.map(b => b);
+
+  // Stagger first speed changes so the field doesn't move in lockstep at t=0.
+  const nextChange = Array.from({ length: count }, () => Math.floor(rng() * 20));
 
   const pos = new Array<number>(count).fill(0);
   const finishTick = new Array<number>(count).fill(-1);
   const allPos: number[][] = Array.from({ length: count }, () => []);
 
-  // Stagger first bursts so racers don't all jump simultaneously at t=0
-  const nextBurstAt = Array.from({ length: count }, () => Math.floor(rng() * 8));
-
   let t = 0;
 
-  while (finishTick.some((f) => f === -1) && t < 500) {
+  while (finishTick.some((f) => f === -1) && t < 700) {
     const avg = pos.reduce((a, b) => a + b, 0) / count;
 
     for (let i = 0; i < count; i++) {
       if (finishTick[i] !== -1) { allPos[i].push(100); continue; }
 
-      // Smooth baseline creep between bursts
-      let delta = basePace[i];
-
-      // Gentle rubber banding — keeps field together without eliminating drama
-      delta -= (pos[i] - avg) * 0.003;
-
-      // Burst: a sudden surge visible as a lurch forward
-      if (t >= nextBurstAt[i]) {
-        // 1–5% per burst as requested; at ~80% progress tighten to create sprint drama
-        const sprintBonus = pos[i] > 80 ? rng() * 1.5 : 0;
-        const burstSize = 1 + rng() * 4 + sprintBonus; // 1–5% (+ up to 1.5% sprint)
-        delta += burstSize;
-        // Next burst: 10–18 ticks from now (0.8–1.4 seconds)
-        nextBurstAt[i] = t + 10 + Math.floor(rng() * 8);
+      // Pick a new target speed every 12–24 ticks (≈1–2 seconds).
+      if (t >= nextChange[i]) {
+        const sprintBoost = pos[i] > 78 ? rng() * 0.10 : 0;
+        target[i] = 0.08 + rng() * 0.30 + sprintBoost + personalBase[i] * 0.30;
+        nextChange[i] = t + 12 + Math.floor(rng() * 12);
       }
+
+      // Exponential ease toward target (0.12 factor ≈ 8-tick ramp-up).
+      speed[i] += (target[i] - speed[i]) * 0.12;
+
+      // Gentle rubber banding keeps the pack together.
+      let delta = speed[i] - (pos[i] - avg) * 0.003;
 
       delta = Math.max(0.01, delta);
       pos[i] = Math.min(100, pos[i] + delta);
