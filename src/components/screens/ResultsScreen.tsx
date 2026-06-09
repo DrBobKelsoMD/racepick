@@ -11,11 +11,12 @@ interface ResultsScreenProps {
   order: RaceResult[];
   participants: Participant[];
   raceType: RaceTypeId;
+  title?: string;
   onRaceAgain: () => void;
   onDone: () => void;
 }
 
-export default function ResultsScreen({ order, participants, raceType, onRaceAgain, onDone }: ResultsScreenProps) {
+export default function ResultsScreen({ order, participants, raceType, title, onRaceAgain, onDone }: ResultsScreenProps) {
   const [visible, setVisible] = useState(0);
   const rt = RACE_TYPES.find((r) => r.id === raceType);
 
@@ -38,7 +39,12 @@ export default function ResultsScreen({ order, participants, raceType, onRaceAga
     <div className="screen">
       <div>
         <Logo size="sm" />
-        <div className="page-title" style={{ marginTop: 14 }}>Final Order</div>
+        {title && (
+          <div style={{ fontFamily: 'var(--font-d)', fontWeight: 900, fontSize: 'clamp(18px, 3vw, 26px)', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--accent)', marginTop: 14, marginBottom: 2 }}>
+            {title}
+          </div>
+        )}
+        <div className="page-title" style={{ marginTop: title ? 0 : 14 }}>Final Order</div>
         <div style={{ fontFamily: 'var(--font-d)', fontWeight: 700, fontSize: 18, color: 'var(--ink-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           {rt?.emoji} {rt?.label}
         </div>

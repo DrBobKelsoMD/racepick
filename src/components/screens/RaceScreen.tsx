@@ -43,10 +43,11 @@ interface RaceScreenProps {
   participants: Participant[];
   raceType: RaceTypeId;
   seed: number;
+  title?: string;
   onFinish: (order: RaceResult[]) => void;
 }
 
-export default function RaceScreen({ participants, raceType, seed, onFinish }: RaceScreenProps) {
+export default function RaceScreen({ participants, raceType, seed, title, onFinish }: RaceScreenProps) {
   const [tick, setTick] = useState(0);
   const [showComplete, setShowComplete] = useState(false);
   const raceData = useRef(simulateRace(participants.length, seed));
@@ -98,11 +99,18 @@ export default function RaceScreen({ participants, raceType, seed, onFinish }: R
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
           <Logo size="sm" />
-          <span style={{ fontFamily: 'var(--font-d)', fontWeight: 900, fontSize: 'clamp(20px,3vw,30px)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-            {rt?.emoji} {rt?.label}
-          </span>
+          <div style={{ minWidth: 0 }}>
+            {title && (
+              <div style={{ fontFamily: 'var(--font-d)', fontWeight: 900, fontSize: 'clamp(13px,2vw,18px)', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--accent)', lineHeight: 1, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {title}
+              </div>
+            )}
+            <span style={{ fontFamily: 'var(--font-d)', fontWeight: 900, fontSize: 'clamp(20px,3vw,30px)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+              {rt?.emoji} {rt?.label}
+            </span>
+          </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ fontFamily: 'var(--font-m)', fontSize: 12, color: 'var(--ink-muted)' }}>{progress}%</span>

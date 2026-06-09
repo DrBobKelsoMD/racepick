@@ -39,6 +39,7 @@ export interface RoomRow {
   race_type: RaceTypeId;
   status: 'waiting' | 'racing' | 'done';
   seed: number | null;
+  title: string | null;
   created_at: string;
 }
 

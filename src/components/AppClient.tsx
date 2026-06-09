@@ -19,6 +19,7 @@ export default function AppClient() {
   const [theme, setTheme] = useState<Theme>('warm');
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [raceType, setRaceType] = useState<RaceTypeId>('horse');
+  const [title, setTitle] = useState('');
   const [seed, setSeed] = useState<number | null>(null);
   const [results, setResults] = useState<RaceResult[] | null>(null);
   const [room, setRoom] = useState<RoomRow | null>(null);
@@ -33,12 +34,13 @@ export default function AppClient() {
     setScreen('setup');
   };
 
-  const handleSetupDone = async (data: { participants: Participant[]; raceType: RaceTypeId }) => {
+  const handleSetupDone = async (data: { participants: Participant[]; raceType: RaceTypeId; title: string }) => {
     setParticipants(data.participants);
     setRaceType(data.raceType);
+    setTitle(data.title);
     if (mode === 'remote') {
       try {
-        const newRoom = await createRoom(data.raceType);
+        const newRoom = await createRoom(data.raceType, data.title);
         if (!newRoom) throw new Error('null room');
         setRoom(newRoom);
         setScreen('remoteLobby');
@@ -61,7 +63,7 @@ export default function AppClient() {
   const handleStartRace = () => { setSeed(generateSeed()); setScreen('race'); };
   const handleRaceFinish = (order: RaceResult[]) => { setResults(order); setScreen('results'); };
   const handleRaceAgain = () => { setResults(null); setSeed(generateSeed()); setScreen('race'); };
-  const handleDone = () => { setScreen('home'); setParticipants([]); setResults(null); setSeed(null); setRoom(null); };
+  const handleDone = () => { setScreen('home'); setParticipants([]); setResults(null); setSeed(null); setRoom(null); setTitle(''); };
 
   return (
     <>
@@ -81,6 +83,7 @@ export default function AppClient() {
         <PreRaceScreen
           participants={participants}
           raceType={raceType}
+          title={title || undefined}
           onBack={() => setScreen(mode === 'remote' ? 'remoteLobby' : 'setup')}
           onStartRace={handleStartRace}
         />
@@ -92,6 +95,7 @@ export default function AppClient() {
           participants={participants}
           raceType={raceType}
           seed={seed}
+          title={title || undefined}
           onFinish={handleRaceFinish}
         />
       )}
@@ -101,6 +105,7 @@ export default function AppClient() {
           order={results}
           participants={participants}
           raceType={raceType}
+          title={title || undefined}
           onRaceAgain={handleRaceAgain}
           onDone={handleDone}
         />

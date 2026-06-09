@@ -8,11 +8,12 @@ import type { Participant, RaceTypeId } from '@/types';
 interface PreRaceScreenProps {
   participants: Participant[];
   raceType: RaceTypeId;
+  title?: string;
   onBack: () => void;
   onStartRace: () => void;
 }
 
-export default function PreRaceScreen({ participants, raceType, onBack, onStartRace }: PreRaceScreenProps) {
+export default function PreRaceScreen({ participants, raceType, title, onBack, onStartRace }: PreRaceScreenProps) {
   const [cdVal, setCdVal] = useState<number | 'GO!' | null>(null);
   const rt = RACE_TYPES.find((r) => r.id === raceType);
 
@@ -57,6 +58,15 @@ export default function PreRaceScreen({ participants, raceType, onBack, onStartR
 
       {/* Title */}
       <div>
+        {title && (
+          <div style={{
+            fontFamily: 'var(--font-d)', fontWeight: 900,
+            fontSize: 'clamp(22px, 4vw, 34px)', textTransform: 'uppercase',
+            letterSpacing: '0.04em', color: 'var(--accent)', marginBottom: 4,
+          }}>
+            {title}
+          </div>
+        )}
         <div className="page-title">Starting Grid</div>
         <div style={{
           fontFamily: 'var(--font-d)', fontWeight: 700, fontSize: 18,

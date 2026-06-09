@@ -12,11 +12,11 @@ export const isSupabaseConfigured =
 
 // ── Rooms ──────────────────────────────────────────────
 
-export async function createRoom(raceType: string): Promise<RoomRow | null> {
+export async function createRoom(raceType: string, title?: string): Promise<RoomRow | null> {
   const code = generateRoomCode();
   const { data, error } = await supabase
     .from('rooms')
-    .insert({ code, race_type: raceType, status: 'waiting' })
+    .insert({ code, race_type: raceType, status: 'waiting', title: title || null })
     .select()
     .single();
   if (error) { console.error('createRoom:', error); return null; }

@@ -9,11 +9,12 @@ import type { Mode, Participant, RaceTypeId } from '@/types';
 interface SetupScreenProps {
   mode: Mode;
   onBack: () => void;
-  onStart: (data: { participants: Participant[]; raceType: RaceTypeId }) => void;
+  onStart: (data: { participants: Participant[]; raceType: RaceTypeId; title: string }) => void;
 }
 
 export default function SetupScreen({ mode, onBack, onStart }: SetupScreenProps) {
   const [raceType, setRaceType] = useState<RaceTypeId>('horse');
+  const [title, setTitle] = useState('');
   const [names, setNames] = useState(['Alice', 'Bob', 'Charlie', 'Dave']);
   const [newName, setNewName] = useState('');
 
@@ -28,6 +29,7 @@ export default function SetupScreen({ mode, onBack, onStart }: SetupScreenProps)
     onStart({
       participants: valid.map((name, i) => ({ id: i, name, color: RACER_COLORS[i % RACER_COLORS.length] })),
       raceType,
+      title: title.trim(),
     });
   };
 
@@ -42,6 +44,18 @@ export default function SetupScreen({ mode, onBack, onStart }: SetupScreenProps)
         <span style={{ fontFamily: 'var(--font-d)', fontWeight: 700, fontSize: 14, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--ink-muted)' }}>
           {mode === 'inperson' ? 'In-Person' : 'Remote'} Setup
         </span>
+      </div>
+
+      {/* Race title */}
+      <div>
+        <span className="label">Race Title <span style={{ fontWeight: 400, letterSpacing: 0, textTransform: 'none', fontSize: 10 }}>(optional)</span></span>
+        <input
+          className="input"
+          placeholder="e.g. Fantasy Draft 2026, Snake Draft Round 1…"
+          value={title}
+          maxLength={60}
+          onChange={(e) => setTitle(e.target.value)}
+        />
       </div>
 
       {/* Race type */}
