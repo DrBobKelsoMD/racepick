@@ -336,21 +336,15 @@ a { color: inherit; text-decoration: none; }
 }
 .football-field .lane-rank { color: rgba(255,255,255,0.6); }
 .football-field .lane-dot  { border-color: rgba(255,255,255,0.25); }
+.football-field .lane-name { color: #ffffff; }
 
 .football-field .lane-track {
   background-color: #2e7d42;
+  background-image: url('/field.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
   overflow: visible;
-  /* Three layers: end zones | alternating mowed stripes | yard lines */
-  background-image:
-    linear-gradient(90deg,
-      rgba(0,40,8,0.42) 0%, rgba(0,40,8,0.42) 9%,
-      transparent 9%, transparent 91%,
-      rgba(0,40,8,0.42) 91%
-    ),
-    linear-gradient(90deg, rgba(255,255,255,0.045) 50%, transparent 50%),
-    linear-gradient(90deg, transparent calc(100% - 2px), rgba(255,255,255,0.55) calc(100% - 2px));
-  background-size: 100% 100%, 20% 100%, 10% 100%;
-  background-repeat: no-repeat, repeat-x, repeat-x;
 }
 
 .football-field .lane-fill { opacity: 0.12; }
