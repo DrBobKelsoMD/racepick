@@ -1,0 +1,18 @@
+<svg viewBox="0 0 64 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Hull -->
+  <path d="M2 22 L8 14 L56 14 L62 22 L32 26 Z" fill="currentColor"/>
+  <!-- Deck / cabin -->
+  <path d="M14 14 L18 8 L44 8 L50 14 Z" fill="currentColor" opacity="0.8"/>
+  <!-- Windshield -->
+  <path d="M20 13 L22 9 L38 9 L42 13 Z" fill="var(--bg, #f5f0e8)" opacity="0.3"/>
+  <!-- Cabin highlight stripe -->
+  <path d="M18 11 L44 11" stroke="var(--bg, #f5f0e8)" stroke-width="1" opacity="0.4"/>
+  <!-- Antenna -->
+  <line x1="46" y1="8" x2="48" y2="2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="48" cy="2" r="1" fill="currentColor"/>
+  <!-- Bow spray line -->
+  <path d="M58 20 C62 16 64 12 62 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>
+  <!-- Wake lines -->
+  <path d="M8 24 C14 26 20 27 28 26" stroke="var(--bg, #f5f0e8)" stroke-width="1.2" stroke-linecap="round" opacity="0.25"/>
+  <path d="M12 22 C18 24 24 25 30 24" stroke="var(--bg, #f5f0e8)" stroke-width="1" stroke-linecap="round" opacity="0.18"/>
+</svg>

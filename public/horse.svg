@@ -1,0 +1,24 @@
+<svg viewBox="0 0 48 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Body -->
+  <ellipse cx="22" cy="22" rx="13" ry="9" fill="currentColor"/>
+  <!-- Neck -->
+  <path d="M30 16 C32 10 34 8 33 5" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+  <!-- Head -->
+  <ellipse cx="34" cy="4" rx="4" ry="3" fill="currentColor" transform="rotate(-20 34 4)"/>
+  <!-- Ear -->
+  <path d="M36 2 L38 -1 L40 2" fill="currentColor"/>
+  <!-- Mane -->
+  <path d="M30 8 C28 10 27 14 28 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+  <!-- Tail -->
+  <path d="M9 20 C4 18 2 22 4 28" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <!-- Front legs -->
+  <path d="M32 30 L31 36" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M27 31 L26 36" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <!-- Back legs -->
+  <path d="M17 30 L16 36" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <path d="M12 29 L11 36" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <!-- Eye -->
+  <circle cx="36" cy="4" r="1" fill="var(--bg, #f5f0e8)"/>
+  <!-- Nostril -->
+  <path d="M37 6 C38 7 38 8 37 8" stroke="var(--bg, #f5f0e8)" stroke-width="1" stroke-linecap="round"/>
+</svg>
