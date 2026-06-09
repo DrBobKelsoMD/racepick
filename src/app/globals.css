@@ -330,8 +330,19 @@ a { color: inherit; text-decoration: none; }
 /* ── Mobile ── */
 @media (max-width: 600px) {
   .screen { padding: 20px 18px; gap: 22px; }
-  .lane-label { width: 128px; min-width: 128px; }
+
+  /* Shrink label area so the track gets more horizontal room */
+  .lane-label { width: 80px; min-width: 80px; padding: 0 8px; gap: 6px; }
   .lane-name { display: none; }
+
+  /* Shrink racer pill to a small square showing just the initial */
+  .lane-racer { width: 40px; height: 28px; padding: 0 4px; gap: 0; }
+  .lane-initial { font-size: 15px; }
+  .lane-rname { display: none; }
+
+  /* Shrink the checkered flag */
+  .lane-flag { width: 20px; }
+
   .btn-xl { font-size: 21px; padding: 16px 32px; }
   .result-row { padding: 11px 14px; gap: 10px; }
   .result-name { font-size: 20px; }

@@ -6,14 +6,13 @@ import { simulateRace, formatSeed } from '@/lib/simulation';
 import { RACE_TYPES } from '@/lib/constants';
 import type { Participant, RaceTypeId, RaceResult } from '@/types';
 
-const RACER_W = 108;
-const FLAG_W = 26;
-
-function RaceLane({ participant, position, rank, finished }: {
+function RaceLane({ participant, position, rank, finished, racerW, flagW }: {
   participant: Participant;
   position: number;
   rank: number;
   finished: boolean;
+  racerW: number;
+  flagW: number;
 }) {
   return (
     <div className="race-lane">
@@ -25,7 +24,7 @@ function RaceLane({ participant, position, rank, finished }: {
       <div className="lane-track">
         <div className="lane-fill" style={{ width: `${position}%`, backgroundColor: participant.color }} />
         <div className="lane-racer" style={{
-          left: `calc(${position / 100} * (100% - ${RACER_W + FLAG_W}px))`,
+          left: `calc(${position / 100} * (100% - ${racerW + flagW}px))`,
           backgroundColor: participant.color,
           boxShadow: finished ? '0 0 16px 5px rgba(245,166,35,0.55)' : 'none',
         }}>
@@ -50,10 +49,21 @@ interface RaceScreenProps {
 export default function RaceScreen({ participants, raceType, seed, title, onFinish }: RaceScreenProps) {
   const [tick, setTick] = useState(0);
   const [showComplete, setShowComplete] = useState(false);
+  const [mobile, setMobile] = useState(false);
   const raceData = useRef(simulateRace(participants.length, seed));
   const onFinishRef = useRef(onFinish);
   onFinishRef.current = onFinish;
   const rt = RACE_TYPES.find((r) => r.id === raceType);
+
+  useEffect(() => {
+    const check = () => setMobile(window.innerWidth < 600);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  const racerW = mobile ? 40 : 108;
+  const flagW = mobile ? 20 : 26;
 
   useEffect(() => {
     let t = 0;
@@ -126,7 +136,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
       {/* Track */}
       <div className="race-track" style={{ flex: 1 }}>
         {participants.map((p, i) => (
-          <RaceLane key={p.id} participant={p} position={pos[i]} rank={ranks[i]} finished={pos[i] >= 100} />
+          <RaceLane key={p.id} participant={p} position={pos[i]} rank={ranks[i]} finished={pos[i] >= 100} racerW={racerW} flagW={flagW} />
         ))}
       </div>
 
