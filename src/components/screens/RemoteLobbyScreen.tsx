@@ -53,7 +53,7 @@ export default function RemoteLobbyScreen({ room, onBack, onLaunch }: RemoteLobb
 
   const joinUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/room/${room.code}`
-    : `racepick.app/room/${room.code}`;
+    : `turnorder.app/room/${room.code}`;
 
   return (
     <div className="screen" style={{ maxWidth: 560 }}>

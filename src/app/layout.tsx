@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'RACE▶PICK — Race to the Draft Order',
+  title: 'TurnOrder.App — Race to the Draft Order',
   description: 'Settle the order. Start the race.',
 };
 
