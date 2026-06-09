@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import Logo from '@/components/Logo';
-import { RACE_TYPES, RACER_COLORS } from '@/lib/constants';
+import { RACER_COLORS } from '@/lib/constants';
 import type { Mode, Participant, RaceTypeId } from '@/types';
 
 interface SetupScreenProps {
@@ -13,7 +12,7 @@ interface SetupScreenProps {
 }
 
 export default function SetupScreen({ mode, onBack, onStart }: SetupScreenProps) {
-  const [raceType, setRaceType] = useState<RaceTypeId>('horse');
+  const raceType: RaceTypeId = 'football';
   const [title, setTitle] = useState('');
   const [names, setNames] = useState(['Alice', 'Bob', 'Charlie', 'Dave']);
   const [newName, setNewName] = useState('');
@@ -56,29 +55,6 @@ export default function SetupScreen({ mode, onBack, onStart }: SetupScreenProps)
           maxLength={60}
           onChange={(e) => setTitle(e.target.value)}
         />
-      </div>
-
-      {/* Race type */}
-      <div>
-        <span className="label">Race Type</span>
-        <div className="race-types">
-          {RACE_TYPES.map((rt) => (
-            <button
-              key={rt.id}
-              className={`rt-btn${raceType === rt.id ? ' active' : ''}`}
-              onClick={() => setRaceType(rt.id)}
-            >
-              <Image
-                src={`/${rt.id}.svg`}
-                alt={rt.label}
-                width={48}
-                height={36}
-                style={{ objectFit: 'contain', color: 'currentColor' }}
-              />
-              <span className="rt-label">{rt.short}</span>
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Participants */}
