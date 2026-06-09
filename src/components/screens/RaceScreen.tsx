@@ -6,7 +6,11 @@ import { simulateRace, formatSeed } from '@/lib/simulation';
 import { RACE_TYPES } from '@/lib/constants';
 import type { Participant, RaceTypeId, RaceResult } from '@/types';
 
-function RaceLane({ participant, position, rank, finished, racerW, flagW, raceType }: {
+const MAX_LANE_H = 180;
+const MIN_LANE_H = 50;
+const NON_TRACK_H = 170; // padding + gaps + header + progress bar + footer
+
+function RaceLane({ participant, position, rank, finished, racerW, flagW, raceType, laneH, spriteW, spriteSheetW }: {
   participant: Participant;
   position: number;
   rank: number;
@@ -14,10 +18,13 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
   racerW: number;
   flagW: number;
   raceType: RaceTypeId;
+  laneH: number;
+  spriteW: number;
+  spriteSheetW: number;
 }) {
   const isFootball = raceType === 'football';
   return (
-    <div className="race-lane">
+    <div className="race-lane" style={isFootball ? { height: laneH } : undefined}>
       <div className="lane-label">
         <span className="lane-rank">#{rank}</span>
         <div className="lane-dot" style={{ backgroundColor: participant.color }} />
@@ -27,12 +34,23 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
         <div className="lane-fill" style={{ width: `${position}%`, backgroundColor: participant.color }} />
         <div className="lane-racer" style={{
           left: `calc(${position / 100} * (100% - ${racerW + flagW}px))`,
-          ...(isFootball ? {} : { backgroundColor: participant.color }),
+          ...(isFootball
+            ? { width: spriteW, height: laneH }
+            : { backgroundColor: participant.color }),
           boxShadow: finished ? '0 0 20px 8px rgba(245,166,35,0.7)' : 'none',
         }}>
           {isFootball ? (
             <>
-              <div className="football-sprite" style={{ backgroundImage: `url('/football-player-${participant.id % 12}.png')` }} />
+              <div
+                className="football-sprite"
+                style={{
+                  backgroundImage: `url('/football-player-${participant.id % 12}.png')`,
+                  width: spriteW,
+                  height: laneH,
+                  backgroundSize: `${spriteSheetW}px ${laneH}px`,
+                  '--fb-sheet-w': `-${spriteSheetW}px`,
+                } as React.CSSProperties}
+              />
               {finished && <span style={{ position: 'absolute', top: -22, left: '50%', transform: 'translateX(-50%)', fontSize: 18 }}>🏆</span>}
             </>
           ) : (
@@ -61,21 +79,35 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
   const [tick, setTick] = useState(0);
   const [showComplete, setShowComplete] = useState(false);
   const [mobile, setMobile] = useState(false);
+  const [viewH, setViewH] = useState(() => typeof window !== 'undefined' ? window.innerHeight : 900);
   const raceData = useRef(simulateRace(participants.length, seed));
   const onFinishRef = useRef(onFinish);
   onFinishRef.current = onFinish;
   const rt = RACE_TYPES.find((r) => r.id === raceType);
 
   useEffect(() => {
-    const check = () => setMobile(window.innerWidth < 600);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
+    const onResize = () => {
+      setMobile(window.innerWidth < 600);
+      setViewH(window.innerHeight);
+    };
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
 
   const isFootball = raceType === 'football';
-  // Football uses sprite frame width; others use pill width
-  const racerW = isFootball ? (mobile ? 46 : 64) : (mobile ? 40 : 108);
+
+  // Shrink lane height so all players fit in the viewport without scrolling
+  const laneH = isFootball
+    ? Math.max(MIN_LANE_H, Math.min(MAX_LANE_H, Math.floor((viewH - NON_TRACK_H) / participants.length)))
+    : MAX_LANE_H;
+
+  // Scale sprite proportionally to laneH
+  const spriteW = isFootball ? Math.max(18, Math.round(64 * laneH / MAX_LANE_H)) : 0;
+  const spriteSheetW = spriteW * 5;
+
+  const racerW = isFootball ? spriteW : (mobile ? 40 : 108);
+
   const trackRef = useRef<HTMLDivElement>(null);
   const [footballFlagW, setFootballFlagW] = useState(46);
 
@@ -85,7 +117,6 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
       if (!trackRef.current) return;
       const labelW = mobile ? 80 : 196;
       const trackW = trackRef.current.offsetWidth - labelW;
-      // Stop when full body clears the goal line: left edge = 88.9% of track
       setFootballFlagW(Math.max(0, Math.round(trackW * 0.111 - racerW)));
     };
     measure();
@@ -119,7 +150,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
 
   return (
     <div style={{
-      minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '22px 28px', gap: 16,
+      height: '100vh', display: 'flex', flexDirection: 'column', padding: '22px 28px', gap: 16,
       ...(isFootball && { background: 'linear-gradient(180deg, #0c2414 0%, #183520 100%)' }),
     }}>
       {showComplete && (
@@ -167,9 +198,21 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
       </div>
 
       {/* Track */}
-      <div ref={trackRef} className={`race-track${isFootball ? ' football-field' : ''}`} style={{ flex: 1 }}>
+      <div ref={trackRef} className={`race-track${isFootball ? ' football-field' : ''}`} style={{ flex: 1, overflow: 'hidden' }}>
         {participants.map((p, i) => (
-          <RaceLane key={p.id} participant={p} position={pos[i]} rank={ranks[i]} finished={pos[i] >= 100} racerW={racerW} flagW={flagW} raceType={raceType} />
+          <RaceLane
+            key={p.id}
+            participant={p}
+            position={pos[i]}
+            rank={ranks[i]}
+            finished={pos[i] >= 100}
+            racerW={racerW}
+            flagW={flagW}
+            raceType={raceType}
+            laneH={laneH}
+            spriteW={spriteW}
+            spriteSheetW={spriteSheetW}
+          />
         ))}
       </div>
 
