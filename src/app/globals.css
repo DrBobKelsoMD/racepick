@@ -388,7 +388,7 @@ a { color: inherit; text-decoration: none; }
 .football-sprite {
   width: 64px;
   height: 180px;
-  background-image: url('/football-player.png');
+  /* background-image set inline per player (football-player-0.png … -11.png) */
   background-size: 320px 180px;   /* 5 frames × 64px wide, 180px tall */
   background-repeat: no-repeat;
   background-position: 0 0;

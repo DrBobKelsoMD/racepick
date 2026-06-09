@@ -32,7 +32,7 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
         }}>
           {isFootball ? (
             <>
-              <div className="football-sprite" />
+              <div className="football-sprite" style={{ backgroundImage: `url('/football-player-${participant.id % 12}.png')` }} />
               {finished && <span style={{ position: 'absolute', top: -22, left: '50%', transform: 'translateX(-50%)', fontSize: 18 }}>🏆</span>}
             </>
           ) : (
