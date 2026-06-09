@@ -38,19 +38,16 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
           boxShadow: finished ? '0 0 20px 8px rgba(245,166,35,0.7)' : 'none',
         }}>
           {isFootball ? (
-            <>
-              <div
-                className="football-sprite"
-                style={{
-                  backgroundImage: `url('/football-player-${participant.id % 12}.png')`,
-                  width: spriteW,
-                  height: laneH,
-                  backgroundSize: `${spriteSheetW}px ${laneH}px`,
-                  '--fb-sheet-w': `-${spriteSheetW}px`,
-                } as React.CSSProperties}
-              />
-              {finished && <span style={{ position: 'absolute', top: -22, left: '50%', transform: 'translateX(-50%)', fontSize: 18 }}>🏆</span>}
-            </>
+            <div
+              className="football-sprite"
+              style={{
+                backgroundImage: `url('/football-player-${participant.id % 12}.png')`,
+                width: spriteW,
+                height: laneH,
+                backgroundSize: `${spriteSheetW}px ${laneH}px`,
+                '--fb-sheet-w': `-${spriteSheetW}px`,
+              } as React.CSSProperties}
+            />
           ) : (
             <>
               <span className="lane-initial">{participant.name[0].toUpperCase()}</span>
@@ -59,6 +56,18 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
             </>
           )}
         </div>
+        {isFootball && finished && (
+          <span style={{
+            position: 'absolute',
+            bottom: '100%',
+            left: `calc(${position / 100} * (100% - ${racerW + flagW}px) + ${spriteW / 2}px)`,
+            transform: 'translateX(-50%)',
+            fontSize: 18,
+            zIndex: 10,
+            pointerEvents: 'none',
+            transition: 'left 80ms linear',
+          }}>🏆</span>
+        )}
         <div className="lane-flag" />
       </div>
     </div>
@@ -161,24 +170,13 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
     }}>
       {portrait && (
         <div style={{
-          position: 'fixed', inset: 0, zIndex: 400,
-          background: 'rgba(0,0,0,0.92)',
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center', gap: 16,
-        }} onClick={() => setPortrait(false)}>
-          <div style={{ fontSize: 64, lineHeight: 1 }}>↻</div>
-          <div style={{
-            fontFamily: 'var(--font-d)', fontWeight: 900, fontSize: 26,
-            color: '#fff', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center',
-          }}>
-            Rotate your device
-          </div>
-          <div style={{ fontFamily: 'var(--font-m)', fontSize: 13, color: 'rgba(255,255,255,0.55)', textAlign: 'center' }}>
-            Best in landscape mode
-          </div>
-          <div style={{ marginTop: 8, fontFamily: 'var(--font-m)', fontSize: 11, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.08em' }}>
-            TAP TO CONTINUE ANYWAY
-          </div>
+          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 200, background: 'rgba(0,0,0,0.72)',
+          padding: '7px 18px', borderRadius: 20,
+          fontFamily: 'var(--font-m)', fontSize: 11, color: 'rgba(255,255,255,0.75)',
+          letterSpacing: '0.07em', whiteSpace: 'nowrap', pointerEvents: 'none',
+        }}>
+          ↻ ROTATE FOR BEST EXPERIENCE
         </div>
       )}
 
@@ -204,16 +202,11 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
           <Logo size="sm" />
-          <div style={{ minWidth: 0 }}>
-            {title && (
-              <div style={{ fontFamily: 'var(--font-d)', fontWeight: 900, fontSize: 'clamp(13px,2vw,18px)', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--accent)', lineHeight: 1, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {title}
-              </div>
-            )}
-            <span style={{ fontFamily: 'var(--font-d)', fontWeight: 900, fontSize: 'clamp(20px,3vw,30px)', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
-              {rt?.emoji} {rt?.label}
-            </span>
-          </div>
+          {title && (
+            <div style={{ minWidth: 0, fontFamily: 'var(--font-d)', fontWeight: 900, fontSize: 'clamp(16px,2.5vw,26px)', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#ffffff', lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {title}
+            </div>
+          )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
           <span style={{ fontFamily: 'var(--font-m)', fontSize: 12, color: 'var(--ink-muted)' }}>{progress}%</span>

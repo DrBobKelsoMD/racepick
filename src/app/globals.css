@@ -364,7 +364,7 @@ a { color: inherit; text-decoration: none; }
   border: none;
   width: 64px;
   height: 180px;
-  overflow: visible;
+  overflow: hidden;
   padding: 0;
   gap: 0;
   position: absolute;
@@ -401,10 +401,10 @@ a { color: inherit; text-decoration: none; }
   /* Shrink the checkered flag */
   .lane-flag { width: 20px; }
 
-  /* Football mobile overrides */
+  /* Football mobile overrides — cover preserves field aspect ratio in portrait */
   .race-track.football-field {
-    background-position: 110px 0;
-    background-size: calc(100% - 110px) 100%;
+    background-position: center center;
+    background-size: cover;
   }
 
   .btn-xl { font-size: 21px; padding: 16px 32px; }
