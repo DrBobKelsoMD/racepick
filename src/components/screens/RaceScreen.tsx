@@ -85,7 +85,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
       if (!trackRef.current) return;
       const labelW = mobile ? 80 : 196;
       const trackW = trackRef.current.offsetWidth - labelW;
-      setFootballFlagW(Math.max(0, Math.round(trackW * 0.142)));
+      setFootballFlagW(Math.max(0, Math.round(trackW * 0.10)));
     };
     measure();
     window.addEventListener('resize', measure);
