@@ -328,11 +328,11 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ── Football field ── */
-.football-field .race-lane { height: 180px; }
+.football-field .race-lane { height: 180px; border-bottom: none; }
 
 .football-field .lane-label {
-  background: #173320;
-  border-right-color: rgba(255,255,255,0.15);
+  background: rgba(20,50,28,0.82);
+  border-right-color: rgba(255,255,255,0.12);
 }
 .football-field .lane-rank { color: rgba(255,255,255,0.6); }
 .football-field .lane-dot  { border-color: rgba(255,255,255,0.25); }
@@ -340,6 +340,7 @@ a { color: inherit; text-decoration: none; }
 
 /* Single field image spans all lanes via the race-track container */
 .race-track.football-field {
+  border: none;
   background-image: url('/field.png');
   background-position: 196px 0;
   background-size: calc(100% - 196px) 100%;
@@ -352,15 +353,9 @@ a { color: inherit; text-decoration: none; }
   overflow: visible;
 }
 
-.football-field .lane-fill { opacity: 0.12; }
-
-/* End zone marker — transparent so field image shows through */
-.football-field .lane-flag {
-  width: 4%;
-  background: transparent;
-  background-image: none;
-  border-left: 3px solid rgba(255,255,255,0.85);
-}
+/* No fill trail and no flag for football */
+.football-field .lane-fill { display: none; }
+.football-field .lane-flag { display: none; }
 
 /* Transparent racer container — just holds the sprite */
 .football-field .lane-racer {
@@ -423,7 +418,6 @@ a { color: inherit; text-decoration: none; }
     background-position: 80px 0;
     background-size: calc(100% - 80px) 100%;
   }
-  .football-field .lane-flag { width: 4%; }
 
   .btn-xl { font-size: 21px; padding: 16px 32px; }
   .result-row { padding: 11px 14px; gap: 10px; }
