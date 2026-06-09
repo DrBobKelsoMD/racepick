@@ -18,7 +18,7 @@ export default function AppClient() {
   const [mode, setMode] = useState<Mode>('inperson');
   const [theme, setTheme] = useState<Theme>('warm');
   const [participants, setParticipants] = useState<Participant[]>([]);
-  const [raceType, setRaceType] = useState<RaceTypeId>('horse');
+  const [raceType, setRaceType] = useState<RaceTypeId>('football');
   const [title, setTitle] = useState('');
   const [seed, setSeed] = useState<number | null>(null);
   const [results, setResults] = useState<RaceResult[] | null>(null);
