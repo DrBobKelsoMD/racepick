@@ -7,9 +7,10 @@ export const RACER_COLORS = [
 ];
 
 export const RACE_TYPES: RaceType[] = [
-  { id: 'horse', label: 'Horse Race', emoji: '🐎', short: 'HORSE' },
-  { id: 'car',   label: 'Car Race',   emoji: '🏎️', short: 'CAR'   },
-  { id: 'boat',  label: 'Boat Race',  emoji: '🚤', short: 'BOAT'  },
+  { id: 'horse',    label: 'Horse Race',    emoji: '🐎', short: 'HORSE'    },
+  { id: 'car',      label: 'Car Race',      emoji: '🏎️', short: 'CAR'      },
+  { id: 'boat',     label: 'Boat Race',     emoji: '🚤', short: 'BOAT'     },
+  { id: 'football', label: 'Football Race', emoji: '🏈', short: 'FOOTBALL' },
 ];
 
 export const THEMES: Record<string, ThemeConfig> = {

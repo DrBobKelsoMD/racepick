@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 36" fill="currentColor">
+  <!-- Helmet -->
+  <ellipse cx="40" cy="8" rx="8" ry="7"/>
+  <!-- Facemask bars -->
+  <path d="M46 7 L53 8 L53 10 L46 9" opacity="0.62"/>
+  <path d="M46 11 L53 12 L53 14 L46 13" opacity="0.62"/>
+  <!-- Shoulder pads (wide trapezoid) -->
+  <path d="M14 14 L46 12 L45 19 L14 20 Z"/>
+  <!-- Torso / jersey -->
+  <rect x="21" y="19" width="20" height="10" rx="2"/>
+  <!-- Left arm reaching back, cradling football -->
+  <path d="M14 16 L6 19 L7 23 L15 20"/>
+  <!-- Football -->
+  <ellipse cx="5" cy="23" rx="5" ry="3" transform="rotate(20 5 23)"/>
+  <!-- Football laces -->
+  <line x1="4" y1="21" x2="6" y2="25" stroke="white" stroke-width="1.2" opacity="0.45"/>
+  <!-- Right arm (forward) -->
+  <path d="M45 14 L52 17 L51 21 L44 18"/>
+  <!-- Front right leg (forward stride) -->
+  <line x1="35" y1="29" x2="44" y2="36" stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <!-- Back left leg (back stride) -->
+  <line x1="27" y1="29" x2="17" y2="36" stroke="currentColor" stroke-width="5" stroke-linecap="round" fill="none"/>
+</svg>

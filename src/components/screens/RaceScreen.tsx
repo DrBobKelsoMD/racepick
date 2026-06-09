@@ -6,14 +6,28 @@ import { simulateRace, formatSeed } from '@/lib/simulation';
 import { RACE_TYPES } from '@/lib/constants';
 import type { Participant, RaceTypeId, RaceResult } from '@/types';
 
-function RaceLane({ participant, position, rank, finished, racerW, flagW }: {
+function FootballPlayerIcon() {
+  return (
+    <svg viewBox="0 0 14 20" style={{ width: 13, height: 19, flexShrink: 0 }} fill="rgba(255,255,255,0.92)">
+      <ellipse cx="7" cy="3.5" rx="4.5" ry="4"/>
+      <path d="M1 9.5 L13 9.5 L12 13.5 L2 13.5 Z"/>
+      <path d="M4.5 13.5 L10 13.5 L9 19 L5.5 19 Z"/>
+      <line x1="8" y1="19" x2="12" y2="20" stroke="rgba(255,255,255,0.92)" strokeWidth="2.2" strokeLinecap="round"/>
+      <line x1="6" y1="19" x2="2" y2="20" stroke="rgba(255,255,255,0.92)" strokeWidth="2.2" strokeLinecap="round"/>
+    </svg>
+  );
+}
+
+function RaceLane({ participant, position, rank, finished, racerW, flagW, raceType }: {
   participant: Participant;
   position: number;
   rank: number;
   finished: boolean;
   racerW: number;
   flagW: number;
+  raceType: RaceTypeId;
 }) {
+  const isFootball = raceType === 'football';
   return (
     <div className="race-lane">
       <div className="lane-label">
@@ -28,7 +42,9 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW }: {
           backgroundColor: participant.color,
           boxShadow: finished ? '0 0 16px 5px rgba(245,166,35,0.55)' : 'none',
         }}>
-          <span className="lane-initial">{participant.name[0].toUpperCase()}</span>
+          {isFootball ? <FootballPlayerIcon /> : (
+            <span className="lane-initial">{participant.name[0].toUpperCase()}</span>
+          )}
           <span className="lane-rname">{participant.name.toUpperCase()}</span>
           {finished && <span style={{ fontSize: 13, flexShrink: 0 }}>🏆</span>}
         </div>
@@ -87,8 +103,13 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
   rankArr.forEach(({ i }, r) => { ranks[i] = r + 1; });
   const progress = Math.round((safeTick / data.totalTicks) * 100);
 
+  const isFootball = raceType === 'football';
+
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '22px 28px', gap: 16 }}>
+    <div style={{
+      minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '22px 28px', gap: 16,
+      ...(isFootball && { background: 'linear-gradient(180deg, #0c2414 0%, #183520 100%)' }),
+    }}>
       {showComplete && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 300,
@@ -134,9 +155,9 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
       </div>
 
       {/* Track */}
-      <div className="race-track" style={{ flex: 1 }}>
+      <div className={`race-track${isFootball ? ' football-field' : ''}`} style={{ flex: 1 }}>
         {participants.map((p, i) => (
-          <RaceLane key={p.id} participant={p} position={pos[i]} rank={ranks[i]} finished={pos[i] >= 100} racerW={racerW} flagW={flagW} />
+          <RaceLane key={p.id} participant={p} position={pos[i]} rank={ranks[i]} finished={pos[i] >= 100} racerW={racerW} flagW={flagW} raceType={raceType} />
         ))}
       </div>
 

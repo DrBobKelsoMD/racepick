@@ -327,6 +327,43 @@ a { color: inherit; text-decoration: none; }
   border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0;
 }
 
+/* ── Football field ── */
+.football-field .lane-label {
+  background: #173320;
+  border-right-color: rgba(255,255,255,0.15);
+}
+.football-field .lane-rank { color: rgba(255,255,255,0.6); }
+.football-field .lane-dot  { border-color: rgba(255,255,255,0.25); }
+
+.football-field .lane-track {
+  background-color: #2e7d42;
+  /* Three background layers: end zones | alternating grass | yard lines */
+  background-image:
+    linear-gradient(90deg,
+      rgba(0,40,8,0.42) 0%, rgba(0,40,8,0.42) 9%,
+      transparent 9%, transparent 91%,
+      rgba(0,40,8,0.42) 91%
+    ),
+    linear-gradient(90deg, rgba(255,255,255,0.045) 50%, transparent 50%),
+    linear-gradient(90deg, transparent calc(100% - 2px), rgba(255,255,255,0.55) calc(100% - 2px));
+  background-size: 100% 100%, 20% 100%, 10% 100%;
+  background-repeat: no-repeat, repeat-x, repeat-x;
+}
+
+.football-field .lane-fill { opacity: 0.1; }
+
+.football-field .lane-flag {
+  background-color: #1b4d28;
+  border-left-color: rgba(255,255,255,0.25);
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255,255,255,0.14) 0, rgba(255,255,255,0.14) 3px,
+    transparent 3px, transparent 7px
+  );
+}
+
+.football-field .lane-racer { border-color: rgba(255,255,255,0.28); }
+
 /* ── Mobile ── */
 @media (max-width: 600px) {
   .screen { padding: 20px 18px; gap: 22px; }
