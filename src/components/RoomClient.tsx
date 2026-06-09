@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Logo from '@/components/Logo';
-import { getRoom, joinRoom, supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { simulateRace, formatSeed } from '@/lib/simulation';
-import { RACER_COLORS, RACE_TYPES } from '@/lib/constants';
-import type { RoomRow, Participant, RaceResult } from '@/types';
+import RaceScreen from '@/components/screens/RaceScreen';
+import { getRoom, joinRoom, getParticipants, supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { formatSeed } from '@/lib/simulation';
+import { RACER_COLORS } from '@/lib/constants';
+import type { RoomRow, Participant, RaceResult, RaceTypeId } from '@/types';
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 
@@ -89,27 +90,26 @@ export default function RoomClient({ code }: RoomClientProps) {
     return () => { supabase.removeChannel(channel); };
   }, [room?.id]);
 
-  // Once racing, load participants and compute results after simulated duration
+  // When race starts, fetch participants so the race screen can render
   useEffect(() => {
-    if (status !== 'racing' || !room?.seed) return;
-    async function fetchAndSimulate() {
-      const { getParticipants } = await import('@/lib/supabase');
-      const rows = await getParticipants(room!.id);
-      const ps: Participant[] = rows.map((r, i) => ({ id: i, name: r.name, color: RACER_COLORS[i % RACER_COLORS.length] }));
-      setParticipants(ps);
-      if (ps.length === 0) return;
-      const data = simulateRace(ps.length, room!.seed!);
-      const duration = data.totalTicks * 80 + 2200;
-      setTimeout(() => { setRaceResults(data.order); setStatus('done'); }, duration);
-    }
-    fetchAndSimulate();
-  }, [status, room?.seed, room?.id]);
+    if (status !== 'racing' || !room?.id) return;
+    getParticipants(room.id).then((rows) => {
+      setParticipants(
+        rows.map((r, i) => ({ id: i, name: r.name, color: RACER_COLORS[i % RACER_COLORS.length] }))
+      );
+    });
+  }, [status, room?.id]);
 
   const handleJoin = async () => {
     if (!room || !name.trim()) return;
     const color = RACER_COLORS[Math.floor(Math.random() * RACER_COLORS.length)];
     const result = await joinRoom(room.id, name.trim(), color);
     if (result) setJoined(true);
+  };
+
+  const handleRaceFinish = (order: RaceResult[]) => {
+    setRaceResults(order);
+    setStatus('done');
   };
 
   if (status === 'loading') {
@@ -136,19 +136,25 @@ export default function RoomClient({ code }: RoomClientProps) {
     return <ParticipantResults order={raceResults} participants={participants} seed={room!.seed!} />;
   }
 
-  if (status === 'racing') {
-    const rt = RACE_TYPES.find((r) => r.id === room?.race_type);
+  // Show the actual race — same deterministic simulation as the host
+  if (status === 'racing' && participants.length > 0 && room?.seed) {
     return (
-      <div className="screen" style={{ alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: 20 }}>
-        <Logo size="md" />
-        <div className="page-title" style={{ color: 'var(--accent)' }}>Race in Progress!</div>
-        <div style={{ fontFamily: 'var(--font-d)', fontSize: 24, color: 'var(--ink-muted)', textTransform: 'uppercase' }}>
-          {rt?.emoji} {rt?.label}
-        </div>
-        <span className="live-badge">● LIVE</span>
-        <p style={{ fontFamily: 'var(--font-m)', fontSize: 13, color: 'var(--ink-muted)' }}>
-          Results will appear when the race ends.
-        </p>
+      <RaceScreen
+        key={room.seed}
+        participants={participants}
+        raceType={room.race_type as RaceTypeId}
+        seed={room.seed}
+        onFinish={handleRaceFinish}
+      />
+    );
+  }
+
+  // Racing but participants not loaded yet — brief spinner
+  if (status === 'racing') {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 16 }}>
+        <Logo />
+        <div className="spinner" />
       </div>
     );
   }
