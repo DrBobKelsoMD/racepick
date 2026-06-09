@@ -328,6 +328,8 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ── Football field ── */
+.football-field .race-lane { height: 180px; }
+
 .football-field .lane-label {
   background: #173320;
   border-right-color: rgba(255,255,255,0.15);
@@ -337,7 +339,8 @@ a { color: inherit; text-decoration: none; }
 
 .football-field .lane-track {
   background-color: #2e7d42;
-  /* Three background layers: end zones | alternating grass | yard lines */
+  overflow: visible;
+  /* Three layers: end zones | alternating mowed stripes | yard lines */
   background-image:
     linear-gradient(90deg,
       rgba(0,40,8,0.42) 0%, rgba(0,40,8,0.42) 9%,
@@ -350,7 +353,7 @@ a { color: inherit; text-decoration: none; }
   background-repeat: no-repeat, repeat-x, repeat-x;
 }
 
-.football-field .lane-fill { opacity: 0.1; }
+.football-field .lane-fill { opacity: 0.12; }
 
 .football-field .lane-flag {
   background-color: #1b4d28;
@@ -362,7 +365,37 @@ a { color: inherit; text-decoration: none; }
   );
 }
 
-.football-field .lane-racer { border-color: rgba(255,255,255,0.28); }
+/* Transparent racer container — just holds the sprite */
+.football-field .lane-racer {
+  background: transparent;
+  border: none;
+  width: 64px;
+  height: 180px;
+  overflow: visible;
+  padding: 0;
+  gap: 0;
+  position: absolute;
+}
+
+/* ── Football sprite animation ── */
+@keyframes football-run-desktop {
+  to { background-position-x: -320px; }
+}
+@keyframes football-run-mobile {
+  to { background-position-x: -230px; }
+}
+
+.football-sprite {
+  width: 64px;
+  height: 180px;
+  background-image: url('/football-player.png');
+  background-size: 320px 180px;   /* 5 frames × 64px wide, 180px tall */
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  animation: football-run-desktop 0.55s steps(5) infinite;
+}
 
 /* ── Mobile ── */
 @media (max-width: 600px) {
@@ -379,6 +412,16 @@ a { color: inherit; text-decoration: none; }
 
   /* Shrink the checkered flag */
   .lane-flag { width: 20px; }
+
+  /* Football mobile overrides */
+  .football-field .race-lane { height: 130px; }
+  .football-field .lane-racer { width: 46px; height: 130px; }
+  .football-sprite {
+    width: 46px;
+    height: 130px;
+    background-size: 230px 130px;
+    animation: football-run-mobile 0.55s steps(5) infinite;
+  }
 
   .btn-xl { font-size: 21px; padding: 16px 32px; }
   .result-row { padding: 11px 14px; gap: 10px; }
