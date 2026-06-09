@@ -101,7 +101,8 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
   useEffect(() => {
     const check = () => {
       setMobile(window.innerWidth < 600);
-      setPortrait(window.innerWidth < window.innerHeight && window.innerWidth < 768);
+      // Portrait: width < height on a mobile-sized screen
+      setPortrait(window.innerWidth < window.innerHeight && window.innerWidth < 900);
     };
     check();
     window.addEventListener('resize', check);
@@ -158,31 +159,39 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
   rankArr.forEach(({ i }, r) => { ranks[i] = r + 1; });
   const progress = Math.round((safeTick / data.totalTicks) * 100);
 
-  return (
-    <div style={{
-      height: '100vh',
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-      padding: '22px 28px',
-      gap: 16,
-      ...(isFootball && { background: 'linear-gradient(180deg, #0c2414 0%, #183520 100%)' }),
-    }}>
-      {portrait && (
-        <div style={{
-          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
-          zIndex: 200, background: 'rgba(0,0,0,0.72)',
-          padding: '7px 18px', borderRadius: 20,
-          fontFamily: 'var(--font-m)', fontSize: 11, color: 'rgba(255,255,255,0.75)',
-          letterSpacing: '0.07em', whiteSpace: 'nowrap', pointerEvents: 'none',
-        }}>
-          ↻ ROTATE FOR BEST EXPERIENCE
-        </div>
-      )}
+  // In portrait, rotate the entire screen so the race appears in landscape orientation.
+  // width/height are swapped (100vh × 100vw) and centered with rotate(-90deg).
+  const outerStyle: React.CSSProperties = portrait ? {
+    position: 'fixed',
+    top: 'calc(50vh - 50vw)',
+    left: 'calc(50vw - 50vh)',
+    width: '100vh',
+    height: '100vw',
+    transform: 'rotate(-90deg)',
+    transformOrigin: 'center center',
+    zIndex: 100,
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '16px 22px',
+    gap: 12,
+    ...(isFootball ? { background: 'linear-gradient(180deg, #0c2414 0%, #183520 100%)' } : {}),
+  } : {
+    position: 'relative',
+    height: '100vh',
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '22px 28px',
+    gap: 16,
+    ...(isFootball ? { background: 'linear-gradient(180deg, #0c2414 0%, #183520 100%)' } : {}),
+  };
 
+  return (
+    <div style={outerStyle}>
       {showComplete && (
         <div style={{
-          position: 'fixed', inset: 0, zIndex: 300,
+          position: 'absolute', inset: 0, zIndex: 300,
           background: 'rgba(26,26,46,0.78)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>

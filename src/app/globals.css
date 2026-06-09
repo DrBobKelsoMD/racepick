@@ -383,6 +383,7 @@ a { color: inherit; text-decoration: none; }
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   animation: football-run 0.55s steps(5) infinite;
+  clip-path: inset(1px);
 }
 
 /* ── Mobile ── */
@@ -401,10 +402,10 @@ a { color: inherit; text-decoration: none; }
   /* Shrink the checkered flag */
   .lane-flag { width: 20px; }
 
-  /* Football mobile overrides — cover preserves field aspect ratio in portrait */
+  /* Football mobile overrides */
   .race-track.football-field {
-    background-position: center center;
-    background-size: cover;
+    background-position: 110px 0;
+    background-size: calc(100% - 110px) 100%;
   }
 
   .btn-xl { font-size: 21px; padding: 16px 32px; }
