@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import Logo from '@/components/Logo';
 import { simulateRace, formatSeed } from '@/lib/simulation';
 import { RACE_TYPES } from '@/lib/constants';
@@ -77,7 +77,23 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
   // Football uses sprite frame width; others use pill width
   const racerW = isFootball ? (mobile ? 46 : 64) : (mobile ? 40 : 108);
   const trackRef = useRef<HTMLDivElement>(null);
-  const flagW = isFootball ? 0 : (mobile ? 20 : 26);
+  const [footballFlagW, setFootballFlagW] = useState(46);
+
+  useLayoutEffect(() => {
+    if (!isFootball) return;
+    const measure = () => {
+      if (!trackRef.current) return;
+      const labelW = mobile ? 80 : 196;
+      const trackW = trackRef.current.offsetWidth - labelW;
+      // Stop when full body clears the goal line: left edge = 88.9% of track
+      setFootballFlagW(Math.max(0, Math.round(trackW * 0.111 - racerW)));
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [isFootball, mobile, racerW]);
+
+  const flagW = isFootball ? footballFlagW : (mobile ? 20 : 26);
 
   useEffect(() => {
     let t = 0;
