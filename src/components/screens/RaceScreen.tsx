@@ -7,7 +7,7 @@ import { RACE_TYPES } from '@/lib/constants';
 import type { Participant, RaceTypeId, RaceResult } from '@/types';
 
 const MAX_LANE_H = 180;
-const MIN_LANE_H = 50;
+const MIN_LANE_H = 120;
 const NON_TRACK_H = 170; // padding + gaps + header + progress bar + footer
 
 function RaceLane({ participant, position, rank, finished, racerW, flagW, raceType, laneH, spriteW, spriteSheetW }: {
@@ -150,7 +150,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
 
   return (
     <div style={{
-      height: '100vh', display: 'flex', flexDirection: 'column', padding: '22px 28px', gap: 16,
+      minHeight: '100vh', display: 'flex', flexDirection: 'column', padding: '22px 28px', gap: 16,
       ...(isFootball && { background: 'linear-gradient(180deg, #0c2414 0%, #183520 100%)' }),
     }}>
       {showComplete && (
@@ -198,7 +198,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
       </div>
 
       {/* Track */}
-      <div ref={trackRef} className={`race-track${isFootball ? ' football-field' : ''}`} style={{ flex: 1, overflow: 'hidden' }}>
+      <div ref={trackRef} className={`race-track${isFootball ? ' football-field' : ''}`} style={{ flex: 1, minHeight: laneH * participants.length }}>
         {participants.map((p, i) => (
           <RaceLane
             key={p.id}
