@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import Logo from '@/components/Logo';
 import { simulateRace, formatSeed } from '@/lib/simulation';
 import { RACE_TYPES } from '@/lib/constants';
@@ -76,7 +76,23 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
   const isFootball = raceType === 'football';
   // Football uses sprite frame width; others use pill width
   const racerW = isFootball ? (mobile ? 46 : 64) : (mobile ? 40 : 108);
-  const flagW = mobile ? 20 : 26;
+  const [footballFlagW, setFootballFlagW] = useState(120);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (!isFootball) return;
+    const measure = () => {
+      if (!trackRef.current) return;
+      const labelW = mobile ? 80 : 196;
+      const trackW = trackRef.current.offsetWidth - labelW;
+      setFootballFlagW(Math.max(0, Math.round(trackW * 0.142)));
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [isFootball, mobile]);
+
+  const flagW = isFootball ? footballFlagW : (mobile ? 20 : 26);
 
   useEffect(() => {
     let t = 0;
@@ -150,7 +166,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
       </div>
 
       {/* Track */}
-      <div className={`race-track${isFootball ? ' football-field' : ''}`} style={{ flex: 1 }}>
+      <div ref={trackRef} className={`race-track${isFootball ? ' football-field' : ''}`} style={{ flex: 1 }}>
         {participants.map((p, i) => (
           <RaceLane key={p.id} participant={p} position={pos[i]} rank={ranks[i]} finished={pos[i] >= 100} racerW={racerW} flagW={flagW} raceType={raceType} />
         ))}
