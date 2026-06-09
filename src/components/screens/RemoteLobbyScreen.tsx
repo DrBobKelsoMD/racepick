@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Logo from '@/components/Logo';
-import { supabase, getParticipants, startRace } from '@/lib/supabase';
+import { supabase, getParticipants, joinRoom, startRace } from '@/lib/supabase';
 import { generateSeed } from '@/lib/simulation';
 import { RACER_COLORS } from '@/lib/constants';
 import type { Participant, RoomRow, RaceTypeId } from '@/types';
@@ -15,6 +15,8 @@ interface RemoteLobbyScreenProps {
 
 export default function RemoteLobbyScreen({ room, onBack, onLaunch }: RemoteLobbyScreenProps) {
   const [participants, setParticipants] = useState<Participant[]>([]);
+  const [hostName, setHostName] = useState('');
+  const [hostJoined, setHostJoined] = useState(false);
 
   const loadParticipants = useCallback(async () => {
     const rows = await getParticipants(room.id);
@@ -33,6 +35,14 @@ export default function RemoteLobbyScreen({ room, onBack, onLaunch }: RemoteLobb
 
     return () => { supabase.removeChannel(channel); };
   }, [room.id, loadParticipants]);
+
+  const handleHostJoin = async () => {
+    const name = hostName.trim();
+    if (!name) return;
+    const color = RACER_COLORS[0];
+    await joinRoom(room.id, name, color);
+    setHostJoined(true);
+  };
 
   const handleLaunch = async () => {
     if (participants.length < 2) return;
@@ -64,6 +74,28 @@ export default function RemoteLobbyScreen({ room, onBack, onLaunch }: RemoteLobb
           {joinUrl}
         </div>
       </div>
+
+      {/* Host join */}
+      {!hostJoined ? (
+        <div>
+          <span className="label">Join as Host</span>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <input
+              className="input"
+              placeholder="Your name…"
+              value={hostName}
+              maxLength={20}
+              onChange={(e) => setHostName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleHostJoin()}
+              autoFocus
+              style={{ flex: 1 }}
+            />
+            <button className="btn btn-primary" onClick={handleHostJoin} disabled={!hostName.trim()}>
+              Join
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {/* Participant list */}
       <div>
