@@ -352,7 +352,7 @@ a { color: inherit; text-decoration: none; }
 .football-field .lane-track {
   background: transparent;
   background-image: none;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* No fill trail and no flag for football */

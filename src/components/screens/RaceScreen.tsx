@@ -26,8 +26,8 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
   isWaiting: boolean;
 }) {
   const isFootball = raceType === 'football';
-  // Football: no flagW subtraction — sprite right edge reaches track right edge, putting the player deep in the end zone
-  const maxTravel = Math.max(0, isFootball ? trackW - racerW : trackW - racerW - flagW);
+  // Football: stop sprite left edge at goal line (88.9% = left edge of red end zone in field.png)
+  const maxTravel = Math.max(0, isFootball ? Math.round(trackW * 0.889) : trackW - racerW - flagW);
   const pixelPos = Math.round((position / 100) * maxTravel);
   const trophyPixelPos = Math.round((position / 100) * maxTravel + spriteW / 2);
   const rawSpriteSrc = `/football-player-${participant.id % 12}.png`;
