@@ -15,7 +15,6 @@ export default function Logo({ size = 'md' }: LogoProps) {
       userSelect: 'none',
     }}>
       <span style={{ color: 'var(--accent)' }}>TURN</span>
-      <span style={{ color: 'var(--accent-alt)', fontSize: isLg ? '0.42em' : (sz as number) * 0.42, margin: '0 0.03em 0 0.02em', lineHeight: 1 }}>▶</span>
       <span style={{ color: '#89CFF0' }}>ORDER</span>
       <span style={{ color: 'var(--ink-muted)', fontSize: isLg ? '0.32em' : (sz as number) * 0.32, marginLeft: '0.02em', letterSpacing: 0 }}>.APP</span>
     </div>
