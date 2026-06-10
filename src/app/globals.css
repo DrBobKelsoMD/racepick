@@ -383,7 +383,7 @@ a { color: inherit; text-decoration: none; }
   background-position: 0 0;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
-  animation: football-run 0.55s steps(5) infinite;
+  animation: football-run 0.55s steps(8) infinite;
   clip-path: inset(1px);
 }
 

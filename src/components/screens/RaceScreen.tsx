@@ -179,7 +179,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
     ? Math.min(MAX_LANE_H, Math.floor(trackH / participants.length))
     : MAX_LANE_H;
   const spriteW = isFootball ? Math.max(18, Math.round(64 * laneH / MAX_LANE_H)) : 0;
-  const spriteSheetW = spriteW * 5;
+  const spriteSheetW = spriteW * 8;
   const racerW = isFootball ? spriteW : (mobile ? 40 : 108);
   const flagW = isFootball ? footballFlagW : (mobile ? 20 : 26);
 
