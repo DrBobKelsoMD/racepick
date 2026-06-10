@@ -9,7 +9,18 @@ import type { Participant, RaceTypeId, RaceResult } from '@/types';
 
 const MAX_LANE_H = 180;
 
-function RaceLane({ participant, position, rank, finished, racerW, flagW, raceType, laneH, spriteW, spriteSheetW, trackW }: {
+function hexToHueRotation(hex: string): number {
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  if (d === 0) return 0;
+  let h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  h = ((h * 60) + 360) % 360;
+  return Math.round((h - 220 + 360) % 360);
+}
+
+function RaceLane({ participant, position, rank, finished, racerW, flagW, raceType, laneH, spriteW, spriteSheetW, trackW, isWaiting }: {
   participant: Participant;
   position: number;
   rank: number;
@@ -21,6 +32,7 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
   spriteW: number;
   spriteSheetW: number;
   trackW: number;
+  isWaiting: boolean;
 }) {
   const isFootball = raceType === 'football';
   // Pixel-based position so we can use transform (GPU composited, smooth on mobile).
@@ -28,6 +40,7 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
   const trophyPixelPos = Math.round((position / 100) * Math.max(0, trackW - racerW - flagW) + spriteW / 2);
   const rawSpriteSrc = `/football-player-${participant.id % 12}.png`;
   const spriteSrc = useChromaKey(isFootball ? rawSpriteSrc : '');
+  const hueRotation = hexToHueRotation(participant.color);
   const nameFontSize = isFootball ? Math.min(20, Math.max(11, Math.round(laneH * 0.24))) : 13;
 
   return (
@@ -78,6 +91,8 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
                   height: laneH,
                   backgroundSize: `${spriteSheetW}px ${laneH}px`,
                   '--fb-sheet-w': `-${spriteSheetW}px`,
+                  filter: `hue-rotate(${hueRotation}deg)`,
+                  ...(isWaiting ? { animation: 'none', backgroundPositionX: '0px' } : {}),
                 } as React.CSSProperties}
               />
             ) : (
@@ -299,6 +314,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
             spriteW={spriteW}
             spriteSheetW={spriteSheetW}
             trackW={trackW}
+            isWaiting={cdVal !== null}
           />
         ))}
       </div>
