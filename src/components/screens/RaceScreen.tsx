@@ -26,8 +26,10 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
   isWaiting: boolean;
 }) {
   const isFootball = raceType === 'football';
-  const pixelPos = Math.round((position / 100) * Math.max(0, trackW - racerW - flagW));
-  const trophyPixelPos = Math.round((position / 100) * Math.max(0, trackW - racerW - flagW) + spriteW / 2);
+  // Football: no flagW subtraction — sprite right edge reaches track right edge, putting the player deep in the end zone
+  const maxTravel = Math.max(0, isFootball ? trackW - racerW : trackW - racerW - flagW);
+  const pixelPos = Math.round((position / 100) * maxTravel);
+  const trophyPixelPos = Math.round((position / 100) * maxTravel + spriteW / 2);
   const rawSpriteSrc = `/football-player-${participant.id % 12}.png`;
   const spriteSrc = useFootballSprite(isFootball ? rawSpriteSrc : '', participant.color, participant.id);
   const nameFontSize = isFootball ? Math.min(20, Math.max(11, Math.round(laneH * 0.24))) : 13;
@@ -40,7 +42,7 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
   useEffect(() => {
     const el = frameRef.current;
     if (!el || !isFootball) return;
-    if (isWaiting) {
+    if (isWaiting || finished) {
       el.style.backgroundPositionX = '0px';
       return;
     }
@@ -51,7 +53,7 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
       el.style.backgroundPositionX = `-${f * spriteWRef.current}px`;
     }, 120);
     return () => clearInterval(iv);
-  }, [isWaiting, isFootball]);
+  }, [isWaiting, finished, isFootball]);
 
   return (
     <div className="race-lane" style={isFootball ? { height: laneH } : undefined}>
