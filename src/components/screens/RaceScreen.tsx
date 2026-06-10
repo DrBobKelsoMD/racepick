@@ -8,7 +8,7 @@ import type { Participant, RaceTypeId, RaceResult } from '@/types';
 
 const MAX_LANE_H = 180;
 
-function RaceLane({ participant, position, rank, finished, racerW, flagW, raceType, laneH, spriteW, spriteSheetW }: {
+function RaceLane({ participant, position, rank, finished, racerW, flagW, raceType, laneH, spriteW, spriteSheetW, trackW }: {
   participant: Participant;
   position: number;
   rank: number;
@@ -19,8 +19,12 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
   laneH: number;
   spriteW: number;
   spriteSheetW: number;
+  trackW: number;
 }) {
   const isFootball = raceType === 'football';
+  // Pixel-based position so we can use transform (GPU composited, smooth on mobile).
+  const pixelPos = Math.round((position / 100) * Math.max(0, trackW - racerW - flagW));
+  const trophyPixelPos = Math.round((position / 100) * Math.max(0, trackW - racerW - flagW) + spriteW / 2);
   return (
     <div className="race-lane" style={isFootball ? { height: laneH } : undefined}>
       <div className="lane-label">
@@ -31,7 +35,7 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
       <div className="lane-track">
         <div className="lane-fill" style={{ width: `${position}%`, backgroundColor: participant.color }} />
         <div className="lane-racer" style={{
-          left: `calc(${position / 100} * (100% - ${racerW + flagW}px))`,
+          transform: `translateY(-50%) translateZ(0) translateX(${pixelPos}px)`,
           ...(isFootball
             ? { width: spriteW, height: laneH }
             : { backgroundColor: participant.color }),
@@ -60,12 +64,11 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
           <span style={{
             position: 'absolute',
             bottom: '100%',
-            left: `calc(${position / 100} * (100% - ${racerW + flagW}px) + ${spriteW / 2}px)`,
+            left: `${trophyPixelPos}px`,
             transform: 'translateX(-50%)',
             fontSize: 18,
             zIndex: 10,
             pointerEvents: 'none',
-            transition: 'left 80ms linear',
           }}>🏆</span>
         )}
         <div className="lane-flag" />
@@ -89,6 +92,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
   const [portrait, setPortrait] = useState(false);
   // trackH is the actual rendered height of the race-track div (measured via ref)
   const [trackH, setTrackH] = useState(600);
+  const [trackW, setTrackW] = useState(800);
   const [footballFlagW, setFootballFlagW] = useState(46);
 
   const raceData = useRef(simulateRace(participants.length, seed));
@@ -119,9 +123,10 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
       const newLaneH = Math.min(MAX_LANE_H, Math.floor(h / participants.length));
       const newSpriteW = Math.max(18, Math.round(64 * newLaneH / MAX_LANE_H));
       const labelW = mobile ? 110 : 196;
-      const trackW = trackRef.current.offsetWidth - labelW;
+      const effectiveW = trackRef.current.offsetWidth - labelW;
       setTrackH(h);
-      setFootballFlagW(Math.max(0, Math.round(trackW * 0.111 - newSpriteW)));
+      setTrackW(effectiveW);
+      setFootballFlagW(Math.max(0, Math.round(effectiveW * 0.111 - newSpriteW)));
     };
     measure();
     window.addEventListener('resize', measure);
@@ -243,6 +248,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
             laneH={laneH}
             spriteW={spriteW}
             spriteSheetW={spriteSheetW}
+            trackW={trackW}
           />
         ))}
       </div>

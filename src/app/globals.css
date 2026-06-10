@@ -256,15 +256,15 @@ a { color: inherit; text-decoration: none; }
 }
 
 .lane-racer {
-  position: absolute; top: 50%; transform: translateY(-50%) translateZ(0);
+  position: absolute; top: 50%;
   height: 36px; width: 108px; border-radius: 3px;
   display: flex; align-items: center; gap: 4px; padding: 0 6px;
   font-family: var(--font-d); font-weight: 900; font-size: 13px;
   text-transform: uppercase; letter-spacing: 0.03em; color: #fff;
   border: 2px solid rgba(0,0,0,0.22);
-  transition: left 100ms ease-out;
+  transition: transform 100ms ease-out;
   z-index: 1; overflow: hidden;
-  will-change: left;
+  will-change: transform;
 }
 .lane-initial { font-size: 21px; font-weight: 900; opacity: 0.82; flex-shrink: 0; }
 .lane-rname { font-size: 12px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
