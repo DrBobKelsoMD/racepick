@@ -18,10 +18,10 @@ export default function HomeScreen({ onSelect }: HomeScreenProps) {
       </div>
 
       <div style={{
-        fontFamily: 'var(--font-d)', fontWeight: 700, fontSize: 'clamp(18px,2.5vw,24px)',
-        color: 'var(--ink-muted)', textTransform: 'uppercase', letterSpacing: '0.07em',
+        fontFamily: 'var(--font-m)', fontWeight: 400, fontSize: 'clamp(13px,1.4vw,16px)',
+        color: 'var(--ink-muted)', lineHeight: 1.65, maxWidth: 560,
       }}>
-        Don&apos;t flip coins. Don&apos;t draw straws. Don&apos;t deal cards. Root yourself on and watch where you land!
+        Because arguments over who goes first ruin game night before it even starts, skip the boring ritual of dealing cards and start rooting for your avatar in a high-stakes showdown to determine your position. It&apos;s quick, it&apos;s fair, and it lets you start the trash-talk early.
       </div>
 
       <div>
