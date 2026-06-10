@@ -95,9 +95,9 @@ export default function RoomClient({ code }: RoomClientProps) {
     return () => { supabase.removeChannel(channel); };
   }, [room?.id]);
 
-  // Host: watch for new participants joining the lobby
+  // Everyone in the lobby watches for new participants (host and non-host alike)
   useEffect(() => {
-    if (!isHost || !room?.id) return;
+    if (!joined || !room?.id) return;
     const channel = supabase
       .channel(`lobby-participants-${room.id}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'room_participants', filter: `room_id=eq.${room.id}` }, () => {
@@ -105,7 +105,7 @@ export default function RoomClient({ code }: RoomClientProps) {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [isHost, room?.id]);
+  }, [joined, room?.id]);
 
   // When race starts, fetch participants so the race screen can render
   useEffect(() => {
@@ -124,9 +124,9 @@ export default function RoomClient({ code }: RoomClientProps) {
     if (!result) return;
     setJoined(true);
     const all = await getParticipants(room.id);
+    setLobbyRows(all);
     if (all.length > 0 && all[0].id === result.id) {
       setIsHost(true);
-      setLobbyRows(all);
     }
   };
 
@@ -236,19 +236,37 @@ export default function RoomClient({ code }: RoomClientProps) {
 
   if (joined) {
     return (
-      <div className="screen" style={{ alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: 20 }}>
-        <Logo size="md" />
-        <div className="page-title">You&apos;re In!</div>
-        <div className="spinner" style={{ margin: '0 auto' }} />
-        <p style={{ fontFamily: 'var(--font-m)', fontSize: 13, color: 'var(--ink-muted)' }}>
-          Waiting for the host to launch the race…
-        </p>
-        <div style={{
-          fontFamily: 'var(--font-d)', fontWeight: 900, fontSize: 28, letterSpacing: '0.1em',
-          color: 'var(--accent)', border: '2px solid var(--border)', padding: '8px 20px',
-          borderRadius: 3, boxShadow: '3px 3px 0 var(--border)',
-        }}>
-          {name.toUpperCase()}
+      <div className="screen" style={{ maxWidth: 480 }}>
+        <Logo size="sm" />
+        {room?.title && (
+          <div style={{ fontFamily: 'var(--font-d)', fontWeight: 900, fontSize: 'clamp(16px,3vw,24px)', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--accent)' }}>
+            {room.title}
+          </div>
+        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div className="spinner" />
+          <p style={{ fontFamily: 'var(--font-m)', fontSize: 13, color: 'var(--ink-muted)', margin: 0 }}>
+            Waiting for the host to launch…
+          </p>
+        </div>
+        <div>
+          <span className="label">In the room ({lobbyRows.length})</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {lobbyRows.map((r, i) => (
+              <div key={r.id} className="lobby-row" style={{ animation: 'slideIn 0.3s ease-out both', animationDelay: `${i * 0.05}s` }}>
+                <span className="lobby-check">✓</span>
+                <div style={{ width: 12, height: 12, borderRadius: '50%', backgroundColor: RACER_COLORS[i % RACER_COLORS.length], flexShrink: 0 }} />
+                <span className="lobby-name">{r.name}</span>
+                {r.name === name ? <span style={{ fontFamily: 'var(--font-m)', fontSize: 10, color: 'var(--accent)', marginLeft: 'auto', letterSpacing: '0.08em' }}>YOU</span>
+                  : i === 0 ? <span style={{ fontFamily: 'var(--font-m)', fontSize: 10, color: 'var(--ink-muted)', marginLeft: 'auto', letterSpacing: '0.08em' }}>HOST</span>
+                  : null}
+              </div>
+            ))}
+            <div className="lobby-row" style={{ opacity: 0.45 }}>
+              <div className="spinner" />
+              <span style={{ fontFamily: 'var(--font-m)', fontSize: 12, color: 'var(--ink-muted)' }}>Waiting for more players…</span>
+            </div>
+          </div>
         </div>
       </div>
     );
