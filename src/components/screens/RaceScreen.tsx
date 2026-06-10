@@ -4,6 +4,7 @@ import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import Logo from '@/components/Logo';
 import { simulateRace, formatSeed } from '@/lib/simulation';
 import { RACE_TYPES } from '@/lib/constants';
+import { useChromaKey } from '@/lib/chromakey';
 import type { Participant, RaceTypeId, RaceResult } from '@/types';
 
 const MAX_LANE_H = 180;
@@ -25,6 +26,8 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
   // Pixel-based position so we can use transform (GPU composited, smooth on mobile).
   const pixelPos = Math.round((position / 100) * Math.max(0, trackW - racerW - flagW));
   const trophyPixelPos = Math.round((position / 100) * Math.max(0, trackW - racerW - flagW) + spriteW / 2);
+  const rawSpriteSrc = `/football-player-${participant.id % 12}.png`;
+  const spriteSrc = useChromaKey(isFootball ? rawSpriteSrc : '');
   const nameFontSize = isFootball ? Math.min(20, Math.max(11, Math.round(laneH * 0.24))) : 13;
 
   return (
@@ -70,7 +73,7 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
               <div
                 className="football-sprite"
                 style={{
-                  backgroundImage: `url('/football-player-${participant.id % 12}.png')`,
+                  backgroundImage: `url('${spriteSrc}')`,
                   width: spriteW,
                   height: laneH,
                   backgroundSize: `${spriteSheetW}px ${laneH}px`,
