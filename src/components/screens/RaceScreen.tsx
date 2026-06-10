@@ -254,14 +254,8 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-          <span style={{ fontFamily: 'var(--font-m)', fontSize: 12, color: 'var(--ink-muted)' }}>{progress}%</span>
           <span className="live-badge">● LIVE</span>
         </div>
-      </div>
-
-      {/* Progress bar */}
-      <div style={{ height: 3, background: 'var(--surface-alt)', borderRadius: 2, overflow: 'hidden', flexShrink: 0 }}>
-        <div style={{ height: '100%', width: `${progress}%`, background: 'var(--accent)', transition: 'width 80ms linear' }} />
       </div>
 
       {/* Track — flex:1 fills all remaining viewport height */}
