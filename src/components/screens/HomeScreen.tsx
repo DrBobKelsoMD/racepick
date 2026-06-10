@@ -21,7 +21,7 @@ export default function HomeScreen({ onSelect }: HomeScreenProps) {
         fontFamily: 'var(--font-d)', fontWeight: 700, fontSize: 'clamp(18px,2.5vw,24px)',
         color: 'var(--ink-muted)', textTransform: 'uppercase', letterSpacing: '0.07em',
       }}>
-        Settle the order. Start the race.
+        Don&apos;t flip coins. Don&apos;t draw straws. Don&apos;t deal cards. Root yourself on and watch where you land!
       </div>
 
       <div>
