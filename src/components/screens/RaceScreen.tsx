@@ -25,50 +25,72 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
   // Pixel-based position so we can use transform (GPU composited, smooth on mobile).
   const pixelPos = Math.round((position / 100) * Math.max(0, trackW - racerW - flagW));
   const trophyPixelPos = Math.round((position / 100) * Math.max(0, trackW - racerW - flagW) + spriteW / 2);
+  const nameFontSize = isFootball ? Math.min(20, Math.max(11, Math.round(laneH * 0.24))) : 13;
+
   return (
     <div className="race-lane" style={isFootball ? { height: laneH } : undefined}>
       <div className="lane-label">
         <span className="lane-rank">#{rank}</span>
         <div className="lane-dot" style={{ backgroundColor: participant.color }} />
-        <span className="lane-name">{participant.name}</span>
       </div>
       <div className="lane-track">
         <div className="lane-fill" style={{ width: `${position}%`, backgroundColor: participant.color }} />
-        <div className="lane-racer" style={{
+
+        {/* Wrapper: name + sprite move together */}
+        <div style={{
+          position: 'absolute', top: '50%',
           transform: `translateY(-50%) translateZ(0) translateX(${pixelPos}px)`,
-          ...(isFootball
-            ? { width: spriteW, height: laneH }
-            : { backgroundColor: participant.color }),
-          boxShadow: finished ? '0 0 20px 8px rgba(245,166,35,0.7)' : 'none',
+          transition: 'transform 100ms ease-out',
+          willChange: 'transform',
+          zIndex: 1,
         }}>
-          {isFootball ? (
-            <div
-              className="football-sprite"
-              style={{
-                backgroundImage: `url('/football-player-${participant.id % 12}.png')`,
-                width: spriteW,
-                height: laneH,
-                backgroundSize: `${spriteSheetW}px ${laneH}px`,
-                '--fb-sheet-w': `-${spriteSheetW}px`,
-              } as React.CSSProperties}
-            />
-          ) : (
-            <>
-              <span className="lane-initial">{participant.name[0].toUpperCase()}</span>
-              <span className="lane-rname">{participant.name.toUpperCase()}</span>
-              {finished && <span style={{ fontSize: 13, flexShrink: 0 }}>🏆</span>}
-            </>
-          )}
+          {/* Name floats to the left of the sprite */}
+          <div style={{
+            position: 'absolute', right: '100%', top: '50%',
+            transform: 'translateY(-50%)',
+            paddingRight: 6, whiteSpace: 'nowrap', lineHeight: 1,
+            fontFamily: 'var(--font-d)', fontWeight: 900,
+            fontSize: nameFontSize, textTransform: 'uppercase', letterSpacing: '0.05em',
+            color: isFootball ? '#ffffff' : participant.color,
+            textShadow: '0 1px 8px rgba(0,0,0,0.95)',
+            pointerEvents: 'none',
+          }}>
+            {participant.name}
+          </div>
+
+          <div className="lane-racer" style={{
+            position: 'relative', top: 'auto', transform: 'none',
+            transition: 'none', willChange: 'auto',
+            ...(isFootball
+              ? { width: spriteW, height: laneH }
+              : { backgroundColor: participant.color }),
+            boxShadow: finished ? '0 0 20px 8px rgba(245,166,35,0.7)' : 'none',
+          }}>
+            {isFootball ? (
+              <div
+                className="football-sprite"
+                style={{
+                  backgroundImage: `url('/football-player-${participant.id % 12}.png')`,
+                  width: spriteW,
+                  height: laneH,
+                  backgroundSize: `${spriteSheetW}px ${laneH}px`,
+                  '--fb-sheet-w': `-${spriteSheetW}px`,
+                } as React.CSSProperties}
+              />
+            ) : (
+              <>
+                <span className="lane-initial">{participant.name[0].toUpperCase()}</span>
+                {finished && <span style={{ fontSize: 13, flexShrink: 0 }}>🏆</span>}
+              </>
+            )}
+          </div>
         </div>
+
         {isFootball && finished && (
           <span style={{
-            position: 'absolute',
-            bottom: '100%',
-            left: `${trophyPixelPos}px`,
-            transform: 'translateX(-50%)',
-            fontSize: 18,
-            zIndex: 10,
-            pointerEvents: 'none',
+            position: 'absolute', bottom: '100%',
+            left: `${trophyPixelPos}px`, transform: 'translateX(-50%)',
+            fontSize: 18, zIndex: 10, pointerEvents: 'none',
           }}>🏆</span>
         )}
         <div className="lane-flag" />
@@ -123,7 +145,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
       const h = trackRef.current.offsetHeight;
       const newLaneH = Math.min(MAX_LANE_H, Math.floor(h / participants.length));
       const newSpriteW = Math.max(18, Math.round(64 * newLaneH / MAX_LANE_H));
-      const labelW = mobile ? 110 : 196;
+      const labelW = mobile ? 50 : 72;
       const effectiveW = trackRef.current.offsetWidth - labelW;
       setTrackH(h);
       setTrackW(effectiveW);
