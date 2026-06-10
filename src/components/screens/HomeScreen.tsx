@@ -24,8 +24,6 @@ export default function HomeScreen({ onSelect }: HomeScreenProps) {
         Settle the order. Start the race.
       </div>
 
-      <div style={{ flex: 1, minHeight: 40 }} />
-
       <div>
         <span className="label">Choose your mode</span>
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
@@ -55,6 +53,8 @@ export default function HomeScreen({ onSelect }: HomeScreenProps) {
           </div>
         ))}
       </div>
+
+      <div style={{ flex: 1 }} />
     </div>
   );
 }
