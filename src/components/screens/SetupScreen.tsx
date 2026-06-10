@@ -19,13 +19,7 @@ const EVENT_TYPES = [
 export default function SetupScreen({ mode, onBack, onStart }: SetupScreenProps) {
   const [raceType, setRaceType] = useState<RaceTypeId>('football');
   const [title, setTitle] = useState('');
-  const [names, setNames] = useState(['Alice', 'Bob', 'Charlie', 'Dave']);
-  const [newName, setNewName] = useState('');
-
-  const addName = () => {
-    const n = newName.trim();
-    if (n && names.length < 24) { setNames((p) => [...p, n]); setNewName(''); }
-  };
+  const [names, setNames] = useState(Array(10).fill(''));
 
   const isRemote = mode === 'remote';
 
@@ -75,47 +69,21 @@ export default function SetupScreen({ mode, onBack, onStart }: SetupScreenProps)
             <span className="label" style={{ margin: 0 }}>
               Participants <span style={{ color: 'var(--accent)' }}>{validCount}</span>
             </span>
-            <span style={{ fontFamily: 'var(--font-m)', fontSize: 11, color: 'var(--ink-muted)' }}>2–24 players</span>
+            <span style={{ fontFamily: 'var(--font-m)', fontSize: 11, color: 'var(--ink-muted)' }}>leave blank to skip</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0 12px', alignItems: 'start' }}>
-            {[0, 1, 2].map((colIdx) => {
-              const start = colIdx * 8;
-              const colNames = names.slice(start, start + 8);
-              const showAdd = names.length < 24 && Math.floor(names.length / 8) === colIdx;
-              return (
-                <div key={colIdx} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {colNames.map((name, rowIdx) => {
-                    const i = start + rowIdx;
-                    return (
-                      <div key={i} className="prow">
-                        <div className="pdot" style={{ backgroundColor: RACER_COLORS[i % RACER_COLORS.length] }} />
-                        <input
-                          className="input"
-                          value={name}
-                          style={{ flex: 1, minWidth: 0 }}
-                          onChange={(e) => setNames((p) => p.map((n, idx) => idx === i ? e.target.value : n))}
-                        />
-                        <button className="btn btn-ghost btn-sm icon-btn" onClick={() => setNames((p) => p.filter((_, idx) => idx !== i))}>×</button>
-                      </div>
-                    );
-                  })}
-                  {showAdd && (
-                    <div className="prow">
-                      <div style={{ width: 13, flexShrink: 0 }} />
-                      <input
-                        className="input"
-                        placeholder="+ Add…"
-                        value={newName}
-                        onChange={(e) => setNewName(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && addName()}
-                        style={{ flex: 1, minWidth: 0, borderStyle: 'dashed', opacity: 0.65 }}
-                      />
-                      <button className="btn btn-ghost btn-sm icon-btn" onClick={addName} disabled={!newName.trim()}>+</button>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+          <div className="participant-grid">
+            {names.map((name, i) => (
+              <div key={i} className="prow">
+                <div className="pdot" style={{ backgroundColor: RACER_COLORS[i % RACER_COLORS.length] }} />
+                <input
+                  className="input"
+                  value={name}
+                  placeholder={`Player ${i + 1}`}
+                  style={{ flex: 1, minWidth: 0 }}
+                  onChange={(e) => setNames((p) => p.map((n, idx) => idx === i ? e.target.value : n))}
+                />
+              </div>
+            ))}
           </div>
         </div>
       )}
