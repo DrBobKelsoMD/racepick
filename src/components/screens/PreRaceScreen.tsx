@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Logo from '@/components/Logo';
 import { RACE_TYPES } from '@/lib/constants';
 import type { Participant, RaceTypeId } from '@/types';
@@ -14,41 +13,10 @@ interface PreRaceScreenProps {
 }
 
 export default function PreRaceScreen({ participants, raceType, title, onBack, onStartRace }: PreRaceScreenProps) {
-  const [cdVal, setCdVal] = useState<number | 'GO!' | null>(null);
   const rt = RACE_TYPES.find((r) => r.id === raceType);
-
-  const startCountdown = () => {
-    let n = 3;
-    setCdVal(n);
-    const tick = () => {
-      n--;
-      if (n > 0) { setCdVal(n); setTimeout(tick, 900); }
-      else if (n === 0) {
-        setCdVal('GO!');
-        setTimeout(() => { setCdVal(null); onStartRace(); }, 680);
-      }
-    };
-    setTimeout(tick, 900);
-  };
 
   return (
     <div className="screen">
-      {cdVal !== null && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'var(--ink)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200,
-        }}>
-          <div key={String(cdVal)} style={{
-            fontFamily: 'var(--font-d)', fontWeight: 900,
-            fontSize: 'clamp(130px, 26vw, 300px)',
-            color: cdVal === 'GO!' ? 'var(--accent-alt)' : 'var(--accent)',
-            lineHeight: 1,
-            animation: 'countPulse 0.65s cubic-bezier(0.34, 1.56, 0.64, 1)',
-          }}>
-            {cdVal}
-          </div>
-        </div>
-      )}
 
       {/* Nav */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -90,8 +58,8 @@ export default function PreRaceScreen({ participants, raceType, title, onBack, o
       </div>
 
       <div style={{ marginTop: 'auto' }}>
-        <button className="btn btn-primary btn-lg w-full" onClick={startCountdown}>
-          🏁 Start Countdown
+        <button className="btn btn-primary btn-lg w-full" onClick={onStartRace}>
+          🏁 Start Race
         </button>
       </div>
     </div>

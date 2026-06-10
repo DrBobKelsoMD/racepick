@@ -86,6 +86,7 @@ interface RaceScreenProps {
 }
 
 export default function RaceScreen({ participants, raceType, seed, title, onFinish }: RaceScreenProps) {
+  const [cdVal, setCdVal] = useState<number | 'GO!' | null>(3);
   const [tick, setTick] = useState(0);
   const [showComplete, setShowComplete] = useState(false);
   const [mobile, setMobile] = useState(false);
@@ -143,6 +144,17 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
   const flagW = isFootball ? footballFlagW : (mobile ? 20 : 26);
 
   useEffect(() => {
+    let n = 3;
+    const step = () => {
+      n--;
+      if (n > 0) { setCdVal(n); setTimeout(step, 900); }
+      else if (n === 0) { setCdVal('GO!'); setTimeout(() => setCdVal(null), 700); }
+    };
+    setTimeout(step, 900);
+  }, []);
+
+  useEffect(() => {
+    if (cdVal !== null) return;
     let t = 0;
     const timer = setInterval(() => {
       t++;
@@ -154,7 +166,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
       }
     }, 80);
     return () => clearInterval(timer);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [cdVal]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const data = raceData.current;
   const safeTick = Math.min(tick, data.totalTicks - 1);
@@ -194,6 +206,25 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
 
   return (
     <div style={outerStyle}>
+      {cdVal !== null && (
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 300,
+          background: 'rgba(0,0,0,0.35)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <div key={String(cdVal)} style={{
+            fontFamily: 'var(--font-d)', fontWeight: 900,
+            fontSize: 'clamp(130px, 26vw, 300px)',
+            color: cdVal === 'GO!' ? 'var(--accent-alt)' : '#ffffff',
+            lineHeight: 1,
+            textShadow: '0 4px 60px rgba(0,0,0,0.9)',
+            animation: 'countPulse 0.65s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          }}>
+            {cdVal}
+          </div>
+        </div>
+      )}
+
       {showComplete && (
         <div style={{
           position: 'absolute', inset: 0, zIndex: 300,
