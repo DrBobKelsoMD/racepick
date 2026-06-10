@@ -2,7 +2,7 @@
 
 interface LogoProps { size?: 'sm' | 'md' | 'lg'; }
 
-const sizes: Record<string, number | string> = { sm: 38, md: 68, lg: 'clamp(40px, 10.5vw, 108px)' };
+const sizes: Record<string, number | string> = { sm: 38, md: 68, lg: 'clamp(40px, 17.5vw, 108px)' };
 
 export default function Logo({ size = 'md' }: LogoProps) {
   const sz = sizes[size];
