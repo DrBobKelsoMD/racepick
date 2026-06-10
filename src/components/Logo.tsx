@@ -2,10 +2,11 @@
 
 interface LogoProps { size?: 'sm' | 'md' | 'lg'; }
 
-const sizes = { sm: 38, md: 68, lg: 108 };
+const sizes: Record<string, number | string> = { sm: 38, md: 68, lg: 'clamp(40px, 10.5vw, 108px)' };
 
 export default function Logo({ size = 'md' }: LogoProps) {
   const sz = sizes[size];
+  const isLg = size === 'lg';
   return (
     <div style={{
       fontFamily: 'var(--font-d)', fontWeight: 900,
@@ -14,9 +15,9 @@ export default function Logo({ size = 'md' }: LogoProps) {
       userSelect: 'none',
     }}>
       <span style={{ color: 'var(--accent)' }}>TURN</span>
-      <span style={{ color: 'var(--accent-alt)', fontSize: sz * 0.42, margin: '0 3px 0 2px', lineHeight: 1 }}>▶</span>
+      <span style={{ color: 'var(--accent-alt)', fontSize: isLg ? '0.42em' : (sz as number) * 0.42, margin: '0 0.03em 0 0.02em', lineHeight: 1 }}>▶</span>
       <span style={{ color: '#89CFF0' }}>ORDER</span>
-      <span style={{ color: 'var(--ink-muted)', fontSize: sz * 0.32, marginLeft: 2, letterSpacing: 0 }}>.APP</span>
+      <span style={{ color: 'var(--ink-muted)', fontSize: isLg ? '0.32em' : (sz as number) * 0.32, marginLeft: '0.02em', letterSpacing: 0 }}>.APP</span>
     </div>
   );
 }

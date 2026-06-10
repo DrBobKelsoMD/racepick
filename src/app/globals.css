@@ -388,7 +388,7 @@ a { color: inherit; text-decoration: none; }
 
 /* ── Mobile ── */
 @media (max-width: 600px) {
-  .screen { padding: 20px 18px; gap: 22px; }
+  .screen { padding: 16px 16px; gap: 16px; }
 
   /* Shrink label area so the track gets more horizontal room */
   .lane-label { width: 110px; min-width: 110px; padding: 0 8px; gap: 6px; }
@@ -408,7 +408,7 @@ a { color: inherit; text-decoration: none; }
     background-size: calc(100% - 110px) 100%;
   }
 
-  .btn-xl { font-size: 21px; padding: 16px 32px; }
+  .btn-xl { font-size: 18px; padding: 13px 20px; width: 100%; }
   .result-row { padding: 11px 14px; gap: 10px; }
   .result-name { font-size: 20px; }
   .result-medal { font-size: 24px; width: 36px; }
