@@ -23,6 +23,11 @@ const FINISH_LINE: Partial<Record<RaceTypeId, number>> = {
   board: 0.895, // left edge of FINISH panel in BG Field.png (x≈1720/1920)
 };
 
+// Start offset as fraction of trackW (where the racing area begins inside the background image)
+const START_LINE: Partial<Record<RaceTypeId, number>> = {
+  board: 0.108, // tan racing area starts at x≈207/1920 in BG Field.png, past the START decorative panel
+};
+
 function RaceLane({ participant, position, rank, finished, racerW, flagW, raceType, laneH, spriteW, spriteSheetW, trackW, isWaiting }: {
   participant: Participant;
   position: number;
@@ -41,14 +46,16 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
   const isBoard = raceType === 'board';
   const hasSpriteRacer = isFootball || isBoard;
   const finishFraction = FINISH_LINE[raceType];
+  const startFraction = START_LINE[raceType] ?? 0;
 
+  const startPixel = Math.round(trackW * startFraction);
   const maxTravel = Math.max(0,
     finishFraction != null
-      ? Math.round(trackW * finishFraction)
+      ? Math.round(trackW * finishFraction) - startPixel
       : trackW - racerW - flagW
   );
-  const pixelPos = Math.round((position / 100) * maxTravel);
-  const trophyPixelPos = Math.round((position / 100) * maxTravel + spriteW / 2);
+  const pixelPos = startPixel + Math.round((position / 100) * maxTravel);
+  const trophyPixelPos = pixelPos + Math.round(spriteW / 2);
 
   // Sprite sources — hooks must be called unconditionally
   const footballSrc = useFootballSprite(
@@ -126,21 +133,34 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
             ...(hasSpriteRacer
               ? { width: spriteW, height: laneH }
               : { backgroundColor: participant.color }),
-            boxShadow: finished ? '0 0 20px 8px rgba(245,166,35,0.7)' : 'none',
+            boxShadow: !hasSpriteRacer && finished ? '0 0 20px 8px rgba(245,166,35,0.7)' : 'none',
           }}>
             {hasSpriteRacer ? (
-              <div
-                ref={frameRef}
-                className={spriteClass}
-                style={{
-                  backgroundImage: `url('${spriteSrc}')`,
-                  width: spriteW,
-                  height: laneH,
-                  backgroundSize: `${spriteSheetW}px ${laneH}px`,
-                  backgroundPositionX: '0px',
-                  backgroundPositionY: '0px',
-                }}
-              />
+              <>
+                {finished && (
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    borderRadius: '50%',
+                    background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, transparent 80%)',
+                    zIndex: 0,
+                    pointerEvents: 'none',
+                  }} />
+                )}
+                <div
+                  ref={frameRef}
+                  className={spriteClass}
+                  style={{
+                    backgroundImage: `url('${spriteSrc}')`,
+                    width: spriteW,
+                    height: laneH,
+                    backgroundSize: `${spriteSheetW}px ${laneH}px`,
+                    backgroundPositionX: '0px',
+                    backgroundPositionY: '0px',
+                    position: 'relative', zIndex: 1,
+                    filter: finished ? 'drop-shadow(0 0 5px #FFD700) drop-shadow(0 0 14px rgba(255,215,0,0.85))' : undefined,
+                  }}
+                />
+              </>
             ) : (
               <>
                 <span className="lane-initial">{participant.name[0].toUpperCase()}</span>
