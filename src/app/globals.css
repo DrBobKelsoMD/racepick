@@ -417,6 +417,19 @@ a { color: inherit; text-decoration: none; }
   background-position-y: 0;
 }
 
+/* ── Sprite finish glow ── */
+@keyframes finishGlow {
+  0%, 100% {
+    filter: brightness(1.25) drop-shadow(0 0 10px #FFD700) drop-shadow(0 0 24px rgba(255,200,0,0.95));
+  }
+  50% {
+    filter: brightness(1.8) drop-shadow(0 0 20px #FFD700) drop-shadow(0 0 42px #FFD700) drop-shadow(0 0 65px rgba(255,200,0,0.85));
+  }
+}
+.sprite-finished {
+  animation: finishGlow 1.1s ease-in-out infinite;
+}
+
 /* ── Mobile ── */
 @media (max-width: 600px) {
   .screen { padding: 16px 16px; gap: 16px; }

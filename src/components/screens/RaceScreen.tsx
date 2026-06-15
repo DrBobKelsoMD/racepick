@@ -23,10 +23,8 @@ const FINISH_LINE: Partial<Record<RaceTypeId, number>> = {
   board: 0.895, // left edge of FINISH panel in BG Field.png (x≈1720/1920)
 };
 
-// Start offset as fraction of trackW (where the racing area begins inside the background image)
-const START_LINE: Partial<Record<RaceTypeId, number>> = {
-  board: 0.108, // tan racing area starts at x≈207/1920 in BG Field.png, past the START decorative panel
-};
+// Start offset as fraction of trackW — board has none, meeples begin at x=0 (behind the START panel line)
+const START_LINE: Partial<Record<RaceTypeId, number>> = {};
 
 function RaceLane({ participant, position, rank, finished, racerW, flagW, raceType, laneH, spriteW, spriteSheetW, trackW, isWaiting }: {
   participant: Participant;
@@ -138,17 +136,19 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
             {hasSpriteRacer ? (
               <>
                 {finished && (
+                  // Dark vignette behind character — transparent at center so the meeple shows,
+                  // dark ring outside so it pops against the busy FINISH panel
                   <div style={{
-                    position: 'absolute', inset: 0,
+                    position: 'absolute', inset: -18,
                     borderRadius: '50%',
-                    background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, transparent 80%)',
+                    background: 'radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.7) 55%, rgba(0,0,0,0.4) 80%, transparent 100%)',
                     zIndex: 0,
                     pointerEvents: 'none',
                   }} />
                 )}
                 <div
                   ref={frameRef}
-                  className={spriteClass}
+                  className={finished ? `${spriteClass} sprite-finished` : spriteClass}
                   style={{
                     backgroundImage: `url('${spriteSrc}')`,
                     width: spriteW,
@@ -157,9 +157,18 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
                     backgroundPositionX: '0px',
                     backgroundPositionY: '0px',
                     position: 'relative', zIndex: 1,
-                    filter: finished ? 'drop-shadow(0 0 5px #FFD700) drop-shadow(0 0 14px rgba(255,215,0,0.85))' : undefined,
                   }}
                 />
+                {finished && (
+                  // Bright spotlight beam over the character
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    borderRadius: '50%',
+                    background: 'radial-gradient(ellipse at center, rgba(255,252,180,0.6) 0%, rgba(255,240,100,0.2) 50%, transparent 75%)',
+                    zIndex: 2,
+                    pointerEvents: 'none',
+                  }} />
+                )}
               </>
             ) : (
               <>
