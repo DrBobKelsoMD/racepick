@@ -62,29 +62,27 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
   const pixelPos = startPixel + Math.round((position / 100) * maxTravel);
   const trophyPixelPos = pixelPos + Math.round(spriteW / 2);
 
-  // Spotlight triggers the moment the right edge strictly passes the finish line.
+  // Spotlight triggers once the right edge is 10px inside the finish zone (past the line).
   const touchedFinish = hasSpriteRacer && finishLinePx != null
-    ? pixelPos + spriteW > finishLinePx
+    ? pixelPos + spriteW >= finishLinePx + 10
     : finished;
 
-  // Sprite sources — hooks must be called unconditionally
+  // Sprite sources — hooks must always be called unconditionally
   const footballSrc = useFootballSprite(
     isFootball ? `/football-player-${participant.id % 12}.png` : '',
     participant.color,
     participant.id
   );
-  const meepleSrc = useMeepleSprite(
-    isBoard ? `/meeple-${participant.id % 12}.png` : '',
-    participant.color
-  );
-  const spriteSrc = isFootball ? footballSrc : meepleSrc;
+  // Meeple: three separate images, one per animation frame
+  const meepleStandSrc = useMeepleSprite(isBoard ? '/meeple-stand.png' : '', participant.color);
+  const meepleRun1Src  = useMeepleSprite(isBoard ? '/meeple-run1.png'  : '', participant.color);
+  const meepleRun2Src  = useMeepleSprite(isBoard ? '/meeple-run2.png'  : '', participant.color);
 
   const nameFontSize = hasSpriteRacer
     ? Math.min(20, Math.max(11, Math.round(laneH * 0.24)))
     : 13;
 
-  // React-state-driven frame animation so React always owns backgroundPosition.
-  // Frame 0 = idle (countdown / finished), frames 1–2 alternate while running.
+  // animFrame: 0 = standing (countdown/finished), 1 = run1, 2 = run2
   const [animFrame, setAnimFrame] = useState(0);
   useEffect(() => {
     if (!hasSpriteRacer) return;
@@ -94,7 +92,12 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
     return () => clearInterval(iv);
   }, [isWaiting, finished, hasSpriteRacer]);
 
-  const bgPosX = hasSpriteRacer ? -(animFrame * spriteW) : 0;
+  // Meeple swaps images; football shifts backgroundPosition across a sprite sheet
+  const meepleFrameSrc = animFrame === 1 ? meepleRun1Src : animFrame === 2 ? meepleRun2Src : meepleStandSrc;
+  const spriteSrc = isFootball ? footballSrc : meepleFrameSrc;
+  const bgPosX = isFootball ? -(animFrame * spriteW) : 0;
+  const spriteBgSize = isFootball ? `${spriteSheetW}px ${laneH}px` : `${spriteW}px ${laneH}px`;
+
   const spriteClass = isFootball ? 'football-sprite' : 'meeple-sprite';
 
   return (
@@ -153,7 +156,7 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
                     backgroundImage: `url('${spriteSrc}')`,
                     width: spriteW,
                     height: laneH,
-                    backgroundSize: `${spriteSheetW}px ${laneH}px`,
+                    backgroundSize: spriteBgSize,
                     backgroundPosition: `${bgPosX}px 0px`,
                     position: 'relative', zIndex: 1,
                   }}
