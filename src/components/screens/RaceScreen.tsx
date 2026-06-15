@@ -23,13 +23,16 @@ const FINISH_LINE: Partial<Record<RaceTypeId, number>> = {
   board: 0.895, // left edge of FINISH panel in BG Field.png (x≈1720/1920)
 };
 
-// Start offset as fraction of trackW — board has none, meeples begin at x=0 (behind the START panel line)
-const START_LINE: Partial<Record<RaceTypeId, number>> = {};
+// Start line position as fraction of trackW (the vertical line between START panel and racing area)
+const START_LINE: Partial<Record<RaceTypeId, number>> = {
+  board: 0.108, // right edge of START panel in BG Field.png (x≈207/1920)
+};
 
-function RaceLane({ participant, position, rank, finished, racerW, flagW, raceType, laneH, spriteW, spriteSheetW, trackW, isWaiting }: {
+function RaceLane({ participant, position, rank, finishRank, finished, racerW, flagW, raceType, laneH, spriteW, spriteSheetW, trackW, isWaiting }: {
   participant: Participant;
   position: number;
   rank: number;
+  finishRank: number;
   finished: boolean;
   racerW: number;
   flagW: number;
@@ -46,7 +49,9 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
   const finishFraction = FINISH_LINE[raceType];
   const startFraction = START_LINE[raceType] ?? 0;
 
-  const startPixel = Math.round(trackW * startFraction);
+  // Center the sprite on the start line so the character straddles it at position=0
+  const startLinePixel = Math.round(trackW * startFraction);
+  const startPixel = Math.max(0, startLinePixel - Math.round(spriteW / 2));
   const maxTravel = Math.max(0,
     finishFraction != null
       ? Math.round(trackW * finishFraction) - startPixel
@@ -180,11 +185,21 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
         </div>
 
         {hasSpriteRacer && finished && (
-          <span style={{
+          <div style={{
             position: 'absolute', bottom: '100%',
             left: `${trophyPixelPos}px`, transform: 'translateX(-50%)',
-            fontSize: 18, zIndex: 10, pointerEvents: 'none',
-          }}>🏆</span>
+            zIndex: 10, pointerEvents: 'none',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+          }}>
+            {finishRank === 1 && <span style={{ fontSize: 14, lineHeight: 1 }}>🏆</span>}
+            <span style={{
+              fontFamily: 'var(--font-d)', fontWeight: 900,
+              fontSize: Math.max(13, Math.round(laneH * 0.22)),
+              lineHeight: 1,
+              color: finishRank === 1 ? '#FFD700' : finishRank === 2 ? '#D8D8D8' : finishRank === 3 ? '#CD7F32' : '#ffffff',
+              textShadow: '0 1px 6px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.9)',
+            }}>#{finishRank}</span>
+          </div>
         )}
         <div className="lane-flag" />
       </div>
@@ -290,6 +305,10 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
   const ranks = new Array<number>(participants.length);
   rankArr.forEach(({ i }, r) => { ranks[i] = r + 1; });
 
+  // Finish rank from simulation order (accurate first/second/etc. based on finish tick)
+  const finishRanks = new Array<number>(participants.length).fill(0);
+  data.order.forEach((r, idx) => { finishRanks[r.idx] = idx + 1; });
+
   const trackClass = `race-track${isFootball ? ' football-field' : isBoard ? ' board-field' : ''}`;
 
   const outerStyle: React.CSSProperties = portrait ? {
@@ -380,6 +399,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
             participant={p}
             position={pos[i]}
             rank={ranks[i]}
+            finishRank={finishRanks[i]}
             finished={pos[i] >= 100}
             racerW={racerW}
             flagW={flagW}
