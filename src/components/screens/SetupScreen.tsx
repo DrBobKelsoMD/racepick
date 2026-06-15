@@ -19,7 +19,10 @@ const EVENT_TYPES = [
 export default function SetupScreen({ mode, onBack, onStart }: SetupScreenProps) {
   const [raceType, setRaceType] = useState<RaceTypeId>('football');
   const [title, setTitle] = useState('');
-  const [names, setNames] = useState(['Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5']);
+  const [names, setNames] = useState([
+    'Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5',
+    '', '', '', '', '', '', '',
+  ]);
 
   const isRemote = mode === 'remote';
 
