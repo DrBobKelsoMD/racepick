@@ -49,16 +49,23 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
   const finishFraction = FINISH_LINE[raceType];
   const startFraction = START_LINE[raceType] ?? 0;
 
-  // Center the sprite on the start line so the character straddles it at position=0
+  // Right edge of sprite sits on the start line at position=0 (character lined up behind it)
   const startLinePixel = Math.round(trackW * startFraction);
-  const startPixel = Math.max(0, startLinePixel - Math.round(spriteW / 2));
+  const startPixel = Math.max(0, startLinePixel - spriteW);
+  const finishLinePx = finishFraction != null ? Math.round(trackW * finishFraction) : null;
   const maxTravel = Math.max(0,
-    finishFraction != null
-      ? Math.round(trackW * finishFraction) - startPixel
+    finishLinePx != null
+      ? finishLinePx - startPixel
       : trackW - racerW - flagW
   );
   const pixelPos = startPixel + Math.round((position / 100) * maxTravel);
   const trophyPixelPos = pixelPos + Math.round(spriteW / 2);
+
+  // Visual finish triggers as soon as the leading (right) edge crosses the finish line.
+  // The running animation keeps going until finished (pos=100 = left edge at finish line).
+  const touchedFinish = hasSpriteRacer && finishLinePx != null
+    ? pixelPos + spriteW >= finishLinePx
+    : finished;
 
   // Sprite sources — hooks must be called unconditionally
   const footballSrc = useFootballSprite(
@@ -140,9 +147,7 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
           }}>
             {hasSpriteRacer ? (
               <>
-                {finished && (
-                  // Dark vignette behind character — transparent at center so the meeple shows,
-                  // dark ring outside so it pops against the busy FINISH panel
+                {touchedFinish && (
                   <div style={{
                     position: 'absolute', inset: -18,
                     borderRadius: '50%',
@@ -153,7 +158,7 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
                 )}
                 <div
                   ref={frameRef}
-                  className={finished ? `${spriteClass} sprite-finished` : spriteClass}
+                  className={touchedFinish ? `${spriteClass} sprite-finished` : spriteClass}
                   style={{
                     backgroundImage: `url('${spriteSrc}')`,
                     width: spriteW,
@@ -164,8 +169,7 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
                     position: 'relative', zIndex: 1,
                   }}
                 />
-                {finished && (
-                  // Bright spotlight beam over the character
+                {touchedFinish && (
                   <div style={{
                     position: 'absolute', inset: 0,
                     borderRadius: '50%',
@@ -184,7 +188,7 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
           </div>
         </div>
 
-        {hasSpriteRacer && finished && (
+        {hasSpriteRacer && touchedFinish && (
           <div style={{
             position: 'absolute', bottom: '100%',
             left: `${trophyPixelPos}px`, transform: 'translateX(-50%)',
