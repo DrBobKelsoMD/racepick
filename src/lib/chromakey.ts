@@ -83,3 +83,62 @@ export function useFootballSprite(src: string, jerseyHex: string, playerIndex: n
 
   return out;
 }
+
+// Meeple sprite: white background removal + recolor solid body to player color
+export function useMeepleSprite(src: string, jerseyHex: string): string {
+  const cacheKey = `meeple|${src}|${jerseyHex}`;
+  const [out, setOut] = useState<string>(() => cache.get(cacheKey) ?? src);
+
+  useEffect(() => {
+    if (!src) { setOut(''); return; }
+    if (cache.has(cacheKey)) { setOut(cache.get(cacheKey)!); return; }
+
+    const jersey = hexToRgb(jerseyHex);
+
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const d = imageData.data;
+
+      for (let i = 0; i < d.length; i += 4) {
+        const r = d[i], g = d[i + 1], b = d[i + 2], a = d[i + 3];
+        if (a < 10) continue;
+
+        const minCh = Math.min(r, g, b);
+        const brightness = (r + g + b) / 3;
+
+        // Remove white / near-white background — fade out anti-aliased edges too
+        if (minCh > 180) {
+          d[i + 3] = Math.round(a * Math.max(0, (255 - minCh) / 75));
+          continue;
+        }
+
+        // Keep very dark outlines as-is
+        if (brightness < 50) continue;
+
+        // Everything else is the meeple body → player's color with brightness shading
+        const f = brightness / 180;
+        d[i]     = Math.min(255, Math.round(jersey.r * f));
+        d[i + 1] = Math.min(255, Math.round(jersey.g * f));
+        d[i + 2] = Math.min(255, Math.round(jersey.b * f));
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        cache.set(cacheKey, url);
+        setOut(url);
+      }, 'image/png');
+    };
+    img.src = src;
+  }, [cacheKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return out;
+}

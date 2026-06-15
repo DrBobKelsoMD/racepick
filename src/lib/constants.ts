@@ -8,6 +8,7 @@ export const RACER_COLORS = [
 
 export const RACE_TYPES: RaceType[] = [
   { id: 'football', label: 'Football Race', emoji: '🏈', short: 'FOOTBALL' },
+  { id: 'board', label: 'Game Board', emoji: '🎲', short: 'BOARD' },
 ];
 
 export const THEMES: Record<string, ThemeConfig> = {

@@ -13,7 +13,7 @@ interface SetupScreenProps {
 
 const EVENT_TYPES = [
   { id: 'football' as RaceTypeId, emoji: '🏈', label: 'Fantasy Football', sub: 'Draft Order', available: true },
-  { id: null, emoji: '🎲', label: 'Game Board', sub: 'Turn Order', available: false },
+  { id: 'board' as RaceTypeId, emoji: '🎲', label: 'Game Board', sub: 'Turn Order', available: true },
 ];
 
 export default function SetupScreen({ mode, onBack, onStart }: SetupScreenProps) {

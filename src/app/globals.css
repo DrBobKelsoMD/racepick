@@ -377,6 +377,48 @@ a { color: inherit; text-decoration: none; }
   background-position-y: 0;
 }
 
+/* ── Board game track ── */
+.board-field .race-lane { height: 180px; border-bottom: none; }
+
+.board-field .lane-label {
+  background: rgba(10, 18, 70, 0.85);
+  border-right-color: rgba(255,255,255,0.15);
+}
+.board-field .lane-rank { color: rgba(255,255,255,0.8); }
+.board-field .lane-dot  { border-color: rgba(255,255,255,0.3); }
+.board-field .lane-name { color: #ffffff; }
+
+.race-track.board-field {
+  border: none;
+  background-image: url('/board.png');
+  background-position: 72px 0;
+  background-size: calc(100% - 72px) 100%;
+  background-repeat: no-repeat;
+}
+
+.board-field .lane-track {
+  background: transparent;
+  background-image: none;
+  overflow: visible;
+}
+
+.board-field .lane-fill { display: none; }
+.board-field .lane-flag { display: none; }
+
+.board-field .lane-racer {
+  background: transparent;
+  border: none;
+  overflow: hidden;
+  padding: 0;
+  gap: 0;
+  position: absolute;
+}
+
+.meeple-sprite {
+  background-repeat: no-repeat;
+  background-position-y: 0;
+}
+
 /* ── Mobile ── */
 @media (max-width: 600px) {
   .screen { padding: 16px 16px; gap: 16px; }
@@ -394,6 +436,12 @@ a { color: inherit; text-decoration: none; }
 
   /* Football mobile overrides */
   .race-track.football-field {
+    background-position: 50px 0;
+    background-size: calc(100% - 50px) 100%;
+  }
+
+  /* Board mobile overrides */
+  .race-track.board-field {
     background-position: 50px 0;
     background-size: calc(100% - 50px) 100%;
   }

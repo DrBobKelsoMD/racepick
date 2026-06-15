@@ -1,5 +1,5 @@
 export type Theme = 'warm' | 'night' | 'broadcast';
-export type RaceTypeId = 'football';
+export type RaceTypeId = 'football' | 'board';
 export type Screen = 'home' | 'setup' | 'remoteLobby' | 'prerace' | 'race' | 'results';
 export type Mode = 'inperson' | 'remote';
 

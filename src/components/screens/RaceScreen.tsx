@@ -3,13 +3,25 @@
 import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import Logo from '@/components/Logo';
 import { simulateRace, formatSeed } from '@/lib/simulation';
-import { useFootballSprite } from '@/lib/chromakey';
+import { useFootballSprite, useMeepleSprite } from '@/lib/chromakey';
 import type { Participant, RaceTypeId, RaceResult } from '@/types';
 
 const MAX_LANE_H = 180;
-// Sprite sheet: 1800×800, 3 frames of 600px each
-// spriteW = frameW * laneH / frameH = 600 * laneH / 800 = laneH * 0.75
 const SPRITE_FRAMES = 3;
+
+// Sprite frame aspect ratios (spriteW = laneH * ratio)
+// Football: 600px wide × 800px tall source frame → 0.75
+// Meeple:   600px wide × 800px tall normalized frame → 0.75
+const FRAME_RATIO: Partial<Record<RaceTypeId, number>> = {
+  football: 0.75,
+  board: 0.75,
+};
+
+// Finish line position as fraction of trackW (left edge of finish zone in each background image)
+const FINISH_LINE: Partial<Record<RaceTypeId, number>> = {
+  football: 0.889,
+  board: 0.895, // left edge of FINISH panel in BG Field.png (x≈1720/1920)
+};
 
 function RaceLane({ participant, position, rank, finished, racerW, flagW, raceType, laneH, spriteW, spriteSheetW, trackW, isWaiting }: {
   participant: Participant;
@@ -26,22 +38,42 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
   isWaiting: boolean;
 }) {
   const isFootball = raceType === 'football';
-  // Football: stop sprite left edge at goal line (88.9% = left edge of red end zone in field.png)
-  const maxTravel = Math.max(0, isFootball ? Math.round(trackW * 0.889) : trackW - racerW - flagW);
+  const isBoard = raceType === 'board';
+  const hasSpriteRacer = isFootball || isBoard;
+  const finishFraction = FINISH_LINE[raceType];
+
+  const maxTravel = Math.max(0,
+    finishFraction != null
+      ? Math.round(trackW * finishFraction)
+      : trackW - racerW - flagW
+  );
   const pixelPos = Math.round((position / 100) * maxTravel);
   const trophyPixelPos = Math.round((position / 100) * maxTravel + spriteW / 2);
-  const rawSpriteSrc = `/football-player-${participant.id % 12}.png`;
-  const spriteSrc = useFootballSprite(isFootball ? rawSpriteSrc : '', participant.color, participant.id);
-  const nameFontSize = isFootball ? Math.min(20, Math.max(11, Math.round(laneH * 0.24))) : 13;
 
-  // JS-controlled frame animation: frame 0 = standing still, frames 1-2 = running
+  // Sprite sources — hooks must be called unconditionally
+  const footballSrc = useFootballSprite(
+    isFootball ? `/football-player-${participant.id % 12}.png` : '',
+    participant.color,
+    participant.id
+  );
+  const meepleSrc = useMeepleSprite(
+    isBoard ? `/meeple-${participant.id % 12}.png` : '',
+    participant.color
+  );
+  const spriteSrc = isFootball ? footballSrc : meepleSrc;
+
+  const nameFontSize = hasSpriteRacer
+    ? Math.min(20, Math.max(11, Math.round(laneH * 0.24)))
+    : 13;
+
+  // JS-controlled frame animation: frame 0 = idle (countdown/finish), frames 1–2 = running
   const frameRef = useRef<HTMLDivElement>(null);
   const spriteWRef = useRef(spriteW);
   spriteWRef.current = spriteW;
 
   useEffect(() => {
     const el = frameRef.current;
-    if (!el || !isFootball) return;
+    if (!el || !hasSpriteRacer) return;
     if (isWaiting || finished) {
       el.style.backgroundPositionX = '0px';
       return;
@@ -53,10 +85,12 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
       el.style.backgroundPositionX = `-${f * spriteWRef.current}px`;
     }, 120);
     return () => clearInterval(iv);
-  }, [isWaiting, finished, isFootball]);
+  }, [isWaiting, finished, hasSpriteRacer]);
+
+  const spriteClass = isFootball ? 'football-sprite' : 'meeple-sprite';
 
   return (
-    <div className="race-lane" style={isFootball ? { height: laneH } : undefined}>
+    <div className="race-lane" style={hasSpriteRacer ? { height: laneH } : undefined}>
       <div className="lane-label">
         <span className="lane-rank">#{rank}</span>
         <div className="lane-dot" style={{ backgroundColor: participant.color }} />
@@ -79,7 +113,7 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
             paddingRight: 6, whiteSpace: 'nowrap', lineHeight: 1,
             fontFamily: 'var(--font-d)', fontWeight: 900,
             fontSize: nameFontSize, textTransform: 'uppercase', letterSpacing: '0.05em',
-            color: isFootball ? '#ffffff' : participant.color,
+            color: hasSpriteRacer ? '#ffffff' : participant.color,
             textShadow: '0 1px 8px rgba(0,0,0,0.95)',
             pointerEvents: 'none',
           }}>
@@ -89,15 +123,15 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
           <div className="lane-racer" style={{
             position: 'relative', top: 'auto', transform: 'none',
             transition: 'none', willChange: 'auto',
-            ...(isFootball
+            ...(hasSpriteRacer
               ? { width: spriteW, height: laneH }
               : { backgroundColor: participant.color }),
             boxShadow: finished ? '0 0 20px 8px rgba(245,166,35,0.7)' : 'none',
           }}>
-            {isFootball ? (
+            {hasSpriteRacer ? (
               <div
                 ref={frameRef}
-                className="football-sprite"
+                className={spriteClass}
                 style={{
                   backgroundImage: `url('${spriteSrc}')`,
                   width: spriteW,
@@ -116,7 +150,7 @@ function RaceLane({ participant, position, rank, finished, racerW, flagW, raceTy
           </div>
         </div>
 
-        {isFootball && finished && (
+        {hasSpriteRacer && finished && (
           <span style={{
             position: 'absolute', bottom: '100%',
             left: `${trophyPixelPos}px`, transform: 'translateX(-50%)',
@@ -145,13 +179,15 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
   const [portrait, setPortrait] = useState(false);
   const [trackH, setTrackH] = useState(600);
   const [trackW, setTrackW] = useState(800);
-  const [footballFlagW, setFootballFlagW] = useState(30);
 
   const raceData = useRef(simulateRace(participants.length, seed));
   const onFinishRef = useRef(onFinish);
   onFinishRef.current = onFinish;
   const trackRef = useRef<HTMLDivElement>(null);
+
   const isFootball = raceType === 'football';
+  const isBoard = raceType === 'board';
+  const hasSpriteRacer = isFootball || isBoard;
 
   useEffect(() => {
     const check = () => {
@@ -163,30 +199,35 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
     return () => window.removeEventListener('resize', check);
   }, []);
 
+  // Measure track dimensions for any race type that uses a background image
   useLayoutEffect(() => {
-    if (!isFootball) return;
+    if (!hasSpriteRacer) return;
     const measure = () => {
       if (!trackRef.current) return;
-      const h = trackRef.current.offsetHeight;
       const labelW = mobile ? 50 : 72;
-      const effectiveW = trackRef.current.offsetWidth - labelW;
-      setTrackH(h);
-      setTrackW(effectiveW);
-      setFootballFlagW(Math.max(20, Math.round(effectiveW * 0.08)));
+      setTrackH(trackRef.current.offsetHeight);
+      setTrackW(trackRef.current.offsetWidth - labelW);
     };
     measure();
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
-  }, [isFootball, mobile, participants.length]);
+  }, [hasSpriteRacer, mobile, participants.length]);
 
-  const laneH = isFootball
+  const laneH = hasSpriteRacer
     ? Math.min(MAX_LANE_H, Math.floor(trackH / participants.length))
     : MAX_LANE_H;
-  // Maintain aspect ratio of 600×800 source frame
-  const spriteW = isFootball ? Math.max(18, Math.round(laneH * 0.75)) : 0;
+
+  const frameRatio = FRAME_RATIO[raceType] ?? 0;
+  const spriteW = hasSpriteRacer ? Math.max(18, Math.round(laneH * frameRatio)) : 0;
   const spriteSheetW = spriteW * SPRITE_FRAMES;
-  const racerW = isFootball ? spriteW : (mobile ? 40 : 108);
-  const flagW = isFootball ? footballFlagW : (mobile ? 20 : 26);
+  const racerW = hasSpriteRacer ? spriteW : (mobile ? 40 : 108);
+  const flagW = mobile ? 20 : 26;
+
+  const bgGradient = isFootball
+    ? { background: 'linear-gradient(180deg, #0c2414 0%, #183520 100%)' }
+    : isBoard
+    ? { background: 'linear-gradient(180deg, #060f3a 0%, #0d1a5a 100%)' }
+    : {};
 
   useEffect(() => {
     let n = 3;
@@ -220,6 +261,8 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
   const ranks = new Array<number>(participants.length);
   rankArr.forEach(({ i }, r) => { ranks[i] = r + 1; });
 
+  const trackClass = `race-track${isFootball ? ' football-field' : isBoard ? ' board-field' : ''}`;
+
   const outerStyle: React.CSSProperties = portrait ? {
     position: 'fixed',
     top: 'calc(50vh - 50vw)',
@@ -234,7 +277,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
     flexDirection: 'column',
     padding: '16px 22px',
     gap: 12,
-    ...(isFootball ? { background: 'linear-gradient(180deg, #0c2414 0%, #183520 100%)' } : {}),
+    ...bgGradient,
   } : {
     position: 'relative',
     height: '100vh',
@@ -243,7 +286,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
     flexDirection: 'column',
     padding: '22px 28px',
     gap: 16,
-    ...(isFootball ? { background: 'linear-gradient(180deg, #0c2414 0%, #183520 100%)' } : {}),
+    ...bgGradient,
   };
 
   return (
@@ -301,7 +344,7 @@ export default function RaceScreen({ participants, raceType, seed, title, onFini
       </div>
 
       {/* Track */}
-      <div ref={trackRef} className={`race-track${isFootball ? ' football-field' : ''}`} style={{ flex: 1, minHeight: 0 }}>
+      <div ref={trackRef} className={trackClass} style={{ flex: 1, minHeight: 0 }}>
         {participants.map((p, i) => (
           <RaceLane
             key={p.id}
