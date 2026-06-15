@@ -151,15 +151,29 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
                   }} />
                 )}
                 {isBoard ? (
-                  // Meeple: swap actual <img> src so the browser directly switches images
-                  <img
-                    src={meepleFrameSrc}
-                    width={spriteW}
-                    height={laneH}
-                    alt=""
-                    className={touchedFinish ? 'meeple-sprite sprite-finished' : 'meeple-sprite'}
-                    style={{ display: 'block', position: 'relative', zIndex: 1, objectFit: 'fill' }}
-                  />
+                  // Meeple: all 3 frames pre-loaded, opacity toggles between them — no src swap delay
+                  <div style={{ position: 'relative', width: spriteW, height: laneH, zIndex: 1 }}
+                       className={touchedFinish ? 'sprite-finished' : ''}>
+                    {([
+                      { src: meepleStandSrc, visible: animFrame === 0 },
+                      { src: meepleRun1Src,  visible: animFrame === 1 },
+                      { src: meepleRun2Src,  visible: animFrame === 2 },
+                    ] as const).map(({ src, visible }) => (
+                      <img
+                        key={src}
+                        src={src}
+                        width={spriteW}
+                        height={laneH}
+                        alt=""
+                        style={{
+                          display: 'block',
+                          position: 'absolute', top: 0, left: 0,
+                          objectFit: 'fill',
+                          opacity: visible ? 1 : 0,
+                        }}
+                      />
+                    ))}
+                  </div>
                 ) : (
                   // Football: sprite sheet + backgroundPosition shift
                   <div
