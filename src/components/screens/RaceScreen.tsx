@@ -62,10 +62,10 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
   const pixelPos = startPixel + Math.round((position / 100) * maxTravel);
   const trophyPixelPos = pixelPos + Math.round(spriteW / 2);
 
-  // Spotlight triggers once the whole body has passed the finish line
-  // (left edge of sprite at or past finishLinePx = character fully across).
+  // Spotlight triggers once the right edge is half a sprite-width past the finish line
+  // (clearly "passed" rather than just first-touch).
   const touchedFinish = hasSpriteRacer && finishLinePx != null
-    ? pixelPos >= finishLinePx
+    ? pixelPos + spriteW >= finishLinePx + Math.round(spriteW * 0.5)
     : finished;
 
   // Sprite sources — hooks must be called unconditionally
@@ -93,14 +93,14 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
     const el = frameRef.current;
     if (!el || !hasSpriteRacer) return;
     if (isWaiting || finished) {
-      el.style.backgroundPositionX = '0px';
+      el.style.backgroundPosition = '0px 0px';
       return;
     }
     let f = 1;
-    el.style.backgroundPositionX = `-${spriteWRef.current}px`;
+    el.style.backgroundPosition = `-${spriteWRef.current}px 0px`;
     const iv = setInterval(() => {
       f = f === 1 ? 2 : 1;
-      el.style.backgroundPositionX = `-${f * spriteWRef.current}px`;
+      el.style.backgroundPosition = `-${f * spriteWRef.current}px 0px`;
     }, 120);
     return () => clearInterval(iv);
   }, [isWaiting, finished, hasSpriteRacer]);
@@ -165,7 +165,6 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
                     width: spriteW,
                     height: laneH,
                     backgroundSize: `${spriteSheetW}px ${laneH}px`,
-                    backgroundPositionY: '0px',
                     position: 'relative', zIndex: 1,
                   }}
                 />

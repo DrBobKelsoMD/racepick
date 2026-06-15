@@ -370,9 +370,8 @@ a { color: inherit; text-decoration: none; }
 }
 
 .football-sprite {
-  /* width, height, background-size, background-position-x all set via JS */
   background-repeat: no-repeat;
-  background-position-y: 0;
+  background-position: 0px 0px;
 }
 
 /* ── Board game track ── */
@@ -414,7 +413,7 @@ a { color: inherit; text-decoration: none; }
 
 .meeple-sprite {
   background-repeat: no-repeat;
-  background-position-y: 0;
+  background-position: 0px 0px;
 }
 
 /* ── Sprite finish glow ── */
