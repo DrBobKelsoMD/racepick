@@ -363,9 +363,7 @@ a { color: inherit; text-decoration: none; }
 .football-field .lane-racer {
   background: transparent;
   border: none;
-  width: 64px;
-  height: 180px;
-  overflow: hidden;
+  overflow: visible;
   padding: 0;
   gap: 0;
   position: absolute;
@@ -408,7 +406,7 @@ a { color: inherit; text-decoration: none; }
 .board-field .lane-racer {
   background: transparent;
   border: none;
-  overflow: hidden;
+  overflow: visible;
   padding: 0;
   gap: 0;
   position: absolute;
