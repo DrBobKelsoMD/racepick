@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
 import HomeScreen from '@/components/screens/HomeScreen';
 import SetupScreen from '@/components/screens/SetupScreen';
@@ -29,9 +29,39 @@ export default function AppClient() {
     Object.entries(vars).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
   }, [theme]);
 
+  // Sync screen state with browser history so the back button works within the app
+  useEffect(() => {
+    history.replaceState({ screen: 'home' }, '');
+    const handlePop = (e: PopStateEvent) => {
+      setScreen((e.state?.screen as Screen) ?? 'home');
+    };
+    window.addEventListener('popstate', handlePop);
+    return () => window.removeEventListener('popstate', handlePop);
+  }, []);
+
+  // If the browser back button lands on a screen that needs state we've since cleared, go home
+  useEffect(() => {
+    if (screen === 'results' && !results) {
+      history.replaceState({ screen: 'home' }, '');
+      setScreen('home');
+    } else if (screen === 'race' && seed === null) {
+      history.replaceState({ screen: 'home' }, '');
+      setScreen('home');
+    }
+  }, [screen, results, seed]);
+
+  // Forward navigation: push a history entry so the browser back button can unwind it
+  const goTo = useCallback((s: Screen) => {
+    history.pushState({ screen: s }, '');
+    setScreen(s);
+  }, []);
+
+  // Back navigation: let the browser pop its own history, which fires popstate → setScreen
+  const goBack = useCallback(() => history.back(), []);
+
   const handleModeSelect = async (m: Mode) => {
     setMode(m);
-    setScreen('setup');
+    goTo('setup');
   };
 
   const handleSetupDone = async (data: { participants: Participant[]; raceType: RaceTypeId; title: string }) => {
@@ -43,13 +73,13 @@ export default function AppClient() {
         const newRoom = await createRoom(data.raceType, data.title);
         if (!newRoom) throw new Error('null room');
         setRoom(newRoom);
-        setScreen('remoteLobby');
+        goTo('remoteLobby');
       } catch {
         alert('Failed to create room. Add your Supabase URL and key to .env.local and restart.');
       }
       return;
     } else {
-      setScreen('prerace');
+      goTo('prerace');
     }
   };
 
@@ -57,13 +87,16 @@ export default function AppClient() {
     setParticipants(ps);
     setRaceType(rt);
     setSeed(s);
-    setScreen('race');
+    goTo('race');
   };
 
-  const handleStartRace = () => { setSeed(generateSeed()); setScreen('race'); };
-  const handleRaceFinish = (order: RaceResult[]) => { setResults(order); setScreen('results'); };
-  const handleRaceAgain = () => { setResults(null); setSeed(generateSeed()); setScreen('race'); };
-  const handleDone = () => { setScreen('home'); setParticipants([]); setResults(null); setSeed(null); setRoom(null); setTitle(''); };
+  const handleStartRace = () => { setSeed(generateSeed()); goTo('race'); };
+  const handleRaceFinish = (order: RaceResult[]) => { setResults(order); goTo('results'); };
+  const handleRaceAgain = () => { setResults(null); setSeed(generateSeed()); goTo('race'); };
+  const handleDone = () => {
+    setParticipants([]); setResults(null); setSeed(null); setRoom(null); setTitle('');
+    goTo('home');
+  };
 
   return (
     <>
@@ -72,11 +105,11 @@ export default function AppClient() {
       {screen === 'home' && <HomeScreen onSelect={handleModeSelect} />}
 
       {screen === 'setup' && (
-        <SetupScreen mode={mode} onBack={() => setScreen('home')} onStart={handleSetupDone} />
+        <SetupScreen mode={mode} onBack={goBack} onStart={handleSetupDone} />
       )}
 
       {screen === 'remoteLobby' && room && (
-        <RemoteLobbyScreen room={room} onBack={() => setScreen('setup')} onLaunch={handleLobbyLaunch} />
+        <RemoteLobbyScreen room={room} onBack={goBack} onLaunch={handleLobbyLaunch} />
       )}
 
       {screen === 'prerace' && (
@@ -84,7 +117,7 @@ export default function AppClient() {
           participants={participants}
           raceType={raceType}
           title={title || undefined}
-          onBack={() => setScreen(mode === 'remote' ? 'remoteLobby' : 'setup')}
+          onBack={goBack}
           onStartRace={handleStartRace}
         />
       )}
