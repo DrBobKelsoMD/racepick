@@ -62,10 +62,9 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
   const pixelPos = startPixel + Math.round((position / 100) * maxTravel);
   const trophyPixelPos = pixelPos + Math.round(spriteW / 2);
 
-  // Spotlight triggers once the right edge is half a sprite-width past the finish line
-  // (clearly "passed" rather than just first-touch).
+  // Spotlight triggers the moment the right edge strictly passes the finish line.
   const touchedFinish = hasSpriteRacer && finishLinePx != null
-    ? pixelPos + spriteW >= finishLinePx + Math.round(spriteW * 0.5)
+    ? pixelPos + spriteW > finishLinePx
     : finished;
 
   // Sprite sources — hooks must be called unconditionally
@@ -84,27 +83,18 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
     ? Math.min(20, Math.max(11, Math.round(laneH * 0.24)))
     : 13;
 
-  // JS-controlled frame animation: frame 0 = idle (countdown/finish), frames 1–2 = running
-  const frameRef = useRef<HTMLDivElement>(null);
-  const spriteWRef = useRef(spriteW);
-  spriteWRef.current = spriteW;
-
+  // React-state-driven frame animation so React always owns backgroundPosition.
+  // Frame 0 = idle (countdown / finished), frames 1–2 alternate while running.
+  const [animFrame, setAnimFrame] = useState(0);
   useEffect(() => {
-    const el = frameRef.current;
-    if (!el || !hasSpriteRacer) return;
-    if (isWaiting || finished) {
-      el.style.backgroundPosition = '0px 0px';
-      return;
-    }
-    let f = 1;
-    el.style.backgroundPosition = `-${spriteWRef.current}px 0px`;
-    const iv = setInterval(() => {
-      f = f === 1 ? 2 : 1;
-      el.style.backgroundPosition = `-${f * spriteWRef.current}px 0px`;
-    }, 120);
+    if (!hasSpriteRacer) return;
+    if (isWaiting || finished) { setAnimFrame(0); return; }
+    setAnimFrame(1);
+    const iv = setInterval(() => setAnimFrame(f => f === 1 ? 2 : 1), 120);
     return () => clearInterval(iv);
   }, [isWaiting, finished, hasSpriteRacer]);
 
+  const bgPosX = hasSpriteRacer ? -(animFrame * spriteW) : 0;
   const spriteClass = isFootball ? 'football-sprite' : 'meeple-sprite';
 
   return (
@@ -158,13 +148,13 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
                   }} />
                 )}
                 <div
-                  ref={frameRef}
                   className={touchedFinish ? `${spriteClass} sprite-finished` : spriteClass}
                   style={{
                     backgroundImage: `url('${spriteSrc}')`,
                     width: spriteW,
                     height: laneH,
                     backgroundSize: `${spriteSheetW}px ${laneH}px`,
+                    backgroundPosition: `${bgPosX}px 0px`,
                     position: 'relative', zIndex: 1,
                   }}
                 />
