@@ -62,11 +62,10 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
   const pixelPos = startPixel + Math.round((position / 100) * maxTravel);
   const trophyPixelPos = pixelPos + Math.round(spriteW / 2);
 
-  // Spotlight triggers the moment the leading foot (right edge) crosses the finish line.
-  // Running animation continues until finished (pos=100 = left edge at finish line,
-  // whole body past it). No extra travel beyond the finish line.
+  // Spotlight triggers once the whole body has passed the finish line
+  // (left edge of sprite at or past finishLinePx = character fully across).
   const touchedFinish = hasSpriteRacer && finishLinePx != null
-    ? pixelPos + spriteW >= finishLinePx
+    ? pixelPos >= finishLinePx
     : finished;
 
   // Sprite sources — hooks must be called unconditionally
@@ -166,7 +165,6 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
                     width: spriteW,
                     height: laneH,
                     backgroundSize: `${spriteSheetW}px ${laneH}px`,
-                    backgroundPositionX: '0px',
                     backgroundPositionY: '0px',
                     position: 'relative', zIndex: 1,
                   }}
