@@ -53,18 +53,19 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
   const startLinePixel = Math.round(trackW * startFraction);
   const startPixel = Math.max(0, startLinePixel - spriteW);
   const finishLinePx = finishFraction != null ? Math.round(trackW * finishFraction) : null;
+  // Extend maxTravel by spriteW so at pos=100 the sprite is fully past the finish line
   const maxTravel = Math.max(0,
     finishLinePx != null
-      ? finishLinePx - startPixel
+      ? (finishLinePx - startPixel) + spriteW
       : trackW - racerW - flagW
   );
   const pixelPos = startPixel + Math.round((position / 100) * maxTravel);
   const trophyPixelPos = pixelPos + Math.round(spriteW / 2);
 
-  // Visual finish triggers as soon as the leading (right) edge crosses the finish line.
-  // The running animation keeps going until finished (pos=100 = left edge at finish line).
+  // Visual finish triggers when the left edge of the sprite crosses the finish line
+  // (body is actively crossing). Running animation continues until pos=100 (fully past).
   const touchedFinish = hasSpriteRacer && finishLinePx != null
-    ? pixelPos + spriteW >= finishLinePx
+    ? pixelPos >= finishLinePx
     : finished;
 
   // Sprite sources — hooks must be called unconditionally
