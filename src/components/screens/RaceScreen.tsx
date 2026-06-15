@@ -150,17 +150,30 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
                     pointerEvents: 'none',
                   }} />
                 )}
-                <div
-                  className={touchedFinish ? `${spriteClass} sprite-finished` : spriteClass}
-                  style={{
-                    backgroundImage: `url('${spriteSrc}')`,
-                    width: spriteW,
-                    height: laneH,
-                    backgroundSize: spriteBgSize,
-                    backgroundPosition: `${bgPosX}px 0px`,
-                    position: 'relative', zIndex: 1,
-                  }}
-                />
+                {isBoard ? (
+                  // Meeple: swap actual <img> src so the browser directly switches images
+                  <img
+                    src={meepleFrameSrc}
+                    width={spriteW}
+                    height={laneH}
+                    alt=""
+                    className={touchedFinish ? 'meeple-sprite sprite-finished' : 'meeple-sprite'}
+                    style={{ display: 'block', position: 'relative', zIndex: 1, objectFit: 'fill' }}
+                  />
+                ) : (
+                  // Football: sprite sheet + backgroundPosition shift
+                  <div
+                    className={touchedFinish ? `${spriteClass} sprite-finished` : spriteClass}
+                    style={{
+                      backgroundImage: `url('${spriteSrc}')`,
+                      width: spriteW,
+                      height: laneH,
+                      backgroundSize: spriteBgSize,
+                      backgroundPosition: `${bgPosX}px 0px`,
+                      position: 'relative', zIndex: 1,
+                    }}
+                  />
+                )}
                 {touchedFinish && (
                   <div style={{
                     position: 'absolute', inset: 0,
