@@ -88,7 +88,7 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
     if (!hasSpriteRacer) return;
     if (isWaiting || finished) { setAnimFrame(0); return; }
     setAnimFrame(1);
-    const iv = setInterval(() => setAnimFrame(f => f === 1 ? 2 : 1), 120);
+    const iv = setInterval(() => setAnimFrame(f => f === 1 ? 2 : 1), 180);
     return () => clearInterval(iv);
   }, [isWaiting, finished, hasSpriteRacer]);
 
@@ -97,6 +97,11 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
   const spriteSrc = isFootball ? footballSrc : meepleFrameSrc;
   const bgPosX = isFootball ? -(animFrame * spriteW) : 0;
   const spriteBgSize = isFootball ? `${spriteSheetW}px ${laneH}px` : `${spriteW}px ${laneH}px`;
+
+  // Vertical bounce: meeple hops up on frame 2, down on frame 1 — makes the
+  // 2-pose leg swap read as running instead of a jitter. Idle/finished = grounded.
+  const isRunning = hasSpriteRacer && !isWaiting && !finished;
+  const meepleBounce = isBoard && isRunning ? (animFrame === 2 ? -Math.round(laneH * 0.08) : 0) : 0;
 
   const spriteClass = isFootball ? 'football-sprite' : 'meeple-sprite';
 
@@ -152,7 +157,11 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
                 )}
                 {isBoard ? (
                   // Meeple: all 3 frames pre-loaded, opacity toggles between them — no src swap delay
-                  <div style={{ position: 'relative', width: spriteW, height: laneH, zIndex: 1 }}
+                  <div style={{
+                         position: 'relative', width: spriteW, height: laneH, zIndex: 1,
+                         transform: `translateY(${meepleBounce}px)`,
+                         transition: 'transform 130ms ease-out',
+                       }}
                        className={touchedFinish ? 'sprite-finished' : ''}>
                     {([
                       { src: meepleStandSrc, frame: 0 },
