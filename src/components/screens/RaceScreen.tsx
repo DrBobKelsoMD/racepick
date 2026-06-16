@@ -88,7 +88,7 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
     if (!hasSpriteRacer) return;
     if (isWaiting || finished) { setAnimFrame(0); return; }
     setAnimFrame(1);
-    const iv = setInterval(() => setAnimFrame(f => f === 1 ? 2 : 1), 300);
+    const iv = setInterval(() => setAnimFrame(f => f === 1 ? 2 : 1), 200);
     return () => clearInterval(iv);
   }, [isWaiting, finished, hasSpriteRacer]);
 
