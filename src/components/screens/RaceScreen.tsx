@@ -155,12 +155,12 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
                   <div style={{ position: 'relative', width: spriteW, height: laneH, zIndex: 1 }}
                        className={touchedFinish ? 'sprite-finished' : ''}>
                     {([
-                      { src: meepleStandSrc, visible: animFrame === 0 },
-                      { src: meepleRun1Src,  visible: animFrame === 1 },
-                      { src: meepleRun2Src,  visible: animFrame === 2 },
-                    ] as const).map(({ src, visible }) => (
+                      { src: meepleStandSrc, frame: 0 },
+                      { src: meepleRun1Src,  frame: 1 },
+                      { src: meepleRun2Src,  frame: 2 },
+                    ] as const).map(({ src, frame }) => (
                       <img
-                        key={src}
+                        key={frame}
                         src={src}
                         width={spriteW}
                         height={laneH}
@@ -169,7 +169,7 @@ function RaceLane({ participant, position, rank, finishRank, finished, racerW, f
                           display: 'block',
                           position: 'absolute', top: 0, left: 0,
                           objectFit: 'fill',
-                          opacity: visible ? 1 : 0,
+                          opacity: animFrame === frame ? 1 : 0,
                         }}
                       />
                     ))}
